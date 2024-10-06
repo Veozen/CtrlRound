@@ -1,5 +1,7 @@
-CtrlRound(df_in, by, margins, var, roundingBase=1)  
+**CtrlRound(df_in, by, margins, var, roundingBase=1)**  
+
 Aggregate a dataframe and perform controlled rounding of it's entries.  
+
 input:  
   df_in       : pandas dataframe  
   by          : list of column names on which to aggregate the input dataframe  
