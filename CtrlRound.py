@@ -4,6 +4,67 @@ import distance
 from best_first_search import best_first_search
 
 
+def aggBy(df:pd.DataFrame, by, var):
+    #aggregate a grouped dataframe
+
+    if by is None or not by:
+        #when no group by is specified, .agg returns a series. Here a dataframe is returned instead
+        df_agg = df.agg("sum").to_frame().T
+
+    else:
+        df_agg = df.groupby(by).agg("sum").reset_index()
+
+    return df_agg
+
+def aggregate(df:pd.DataFrame, by, margins, var):
+
+    if by is not None and not isinstance(by,list):
+        by = [by]
+        
+    subsets=[]
+    if by is not None:
+        for i in range(0,len(by)+1):
+            comb = combinations(by,i)
+            subsets = subsets + [list(c) for c in comb]
+    else:
+        subsets=[[]]
+        
+    if margins is not None:
+        subsets = [sub for sub in subsets if sub in margins]
+        
+    df_out = pd.DataFrame()
+
+    for sub in subsets:
+        subAgg = aggBy(df, by=sub, var=var)
+        df_out = pd.concat([df_out,subAgg],ignore_index=True)
+
+
+    return df_out  
+
+def margin_relations(df:pd.DataFrame, by, margins, var, cellId):
+
+    if by is not None and not isinstance(by,list):
+        by = [by]
+        
+    subsets=[]
+    if by is not None:
+        for i in range(0,len(by)+1):
+            comb = combinations(by,i)
+            subsets = subsets + [list(c) for c in comb]
+    else:
+        subsets=[[]]
+        
+    if margins is not None:
+        subsets = [sub for sub in subsets if sub in margins]
+        
+    margin_relations_out= {}
+
+    for sub in subsets:
+        margin_relation_sub = get_margins_cell_relations(df,sub,var,cellId)
+        margin_relations_out.update(margin_relation_sub)
+
+    return margin_relations_out  
+  
 def get_unique_col_name(df,base_name):
   # Generate a unique column name
   i = 1
