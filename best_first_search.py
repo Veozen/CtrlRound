@@ -1,7 +1,7 @@
 import heapq
 from distance import calculate_margin_distance, calculate_interior_distance
 
-def best_first_search(possible_cell_values, initial_values, constraints, constraint_values, NSolutions=0, max_heap_size=1000):
+def best_first_search(possible_cell_values, initial_values, constraints, constraint_values, NSolutions=0, max_heap_size=1000, reset_heap_fraction=0.75):
 """
 Performs best first search
 input:
@@ -11,19 +11,24 @@ input:
   constraint_values     : dictionary of each contraints to the value they shopudl aggregate to
   NSolutions            : the number of solutions to output. The first solutions found.
   max_heap_size         : the maximum size the heap can be. If reached, half the best solutions will be kept.
+  reset_heap_fraction   : When the heap reaches it's maximum size, it is trimmed to keep only the most promising solution. This parameter determines the size of the heap after being trimmed as a fraction of the maximum size. 
+  This parameter has to be between 0 and 1. The higher the value, the more often heap timming occurs. Each trim inceases run-time.
 
 """
     # a unique counter for each partial solution pushed in the heap
     counter = 0
     
+    # the size of the heap after trimming
+    reset_heap_size = int(reset_heap_fraction * max_heap_size)
+    
     # Priority queue for Best First Search
     pq = []
     
-    initial_partial_solution = {}
-    initial_margin_distance          = calculate_margin_distance(initial_partial_solution, initial_values, constraints, constraint_values)
+    initial_partial_solution  = {}
+    initial_margin_distance   = calculate_margin_distance(initial_partial_solution, initial_values, constraints, constraint_values)
     initial_interior_distance = calculate_interior_distance(initial_partial_solution, initial_values)
     initial_total_distance    = initial_margin_distance + initial_interior_distance
-    initial_state = (initial_total_distance, initial_margin_distance, initial_interior_distance, counter, initial_partial_solution)
+    initial_state             = (initial_total_distance, initial_margin_distance, initial_interior_distance, counter, initial_partial_solution)
     
     heapq.heappush(pq, initial_state)
     
@@ -57,7 +62,7 @@ input:
         #if heap gets too large, cut it in half keeping only the best partial solutions
         if len(pq) > max_heap_size:
           pq.sort(key = lambda x: (x[0],x[1],x[2],x[3]))
-          pq= pq[:max_heap_size//2]
+          pq = pq[:reset_heap_size]
           heapq.heapify(pq)
         
         
