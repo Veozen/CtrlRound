@@ -3,20 +3,25 @@ import heapq
 import distance
 from best_first_search import best_first_search
 
-
-def aggBy(df:pd.DataFrame, by, var):
+def aggBy(df:pd.DataFrame, by, var, id):
     #aggregate a grouped dataframe
 
     if by is None or not by:
         #when no group by is specified, .agg returns a series. Here a dataframe is returned instead
-        df_agg = df.agg("sum").to_frame().T
+        df_agg = df.agg({
+      var: "sum", 
+      id: lambda x: x.tolist()
+      })).to_frame().T
 
     else:
-        df_agg = df.groupby(by).agg("sum").reset_index()
+        df_agg = df.groupby(by).agg({
+      var: "sum", 
+      id: lambda x: x.tolist()
+      })).reset_index()
 
     return df_agg
 
-def aggregate(df:pd.DataFrame, by, margins, var):
+def aggregate_and_list(df:pd.DataFrame, by, margins, var, id):
 
     if by is not None and not isinstance(by,list):
         by = [by]
@@ -35,36 +40,11 @@ def aggregate(df:pd.DataFrame, by, margins, var):
     df_out = pd.DataFrame()
 
     for sub in subsets:
-        subAgg = aggBy(df, by=sub, var=var)
+        subAgg = aggBy(df, by=sub, var=var, id)
         df_out = pd.concat([df_out,subAgg],ignore_index=True)
-
 
     return df_out  
 
-def margin_relations(df:pd.DataFrame, by, margins, var, cellId):
-
-    if by is not None and not isinstance(by,list):
-        by = [by]
-        
-    subsets=[]
-    if by is not None:
-        for i in range(0,len(by)+1):
-            comb = combinations(by,i)
-            subsets = subsets + [list(c) for c in comb]
-    else:
-        subsets=[[]]
-        
-    if margins is not None:
-        subsets = [sub for sub in subsets if sub in margins]
-        
-    margin_relations_out= {}
-
-    for sub in subsets:
-        margin_relation_sub = get_margins_cell_relations(df,sub,var,cellId)
-        margin_relations_out.update(margin_relation_sub)
-
-    return margin_relations_out  
-  
 def get_unique_col_name(df,base_name):
   # Generate a unique column name
   i = 1
@@ -120,19 +100,20 @@ output:
       possible_cell_values[row[0]] = [row[1]]
 
   #get margins of the input table
-  df_margins  = aggregate(by_values, by, margins, var)
+  df_margins  = aggregate_and_list(by_values, by, margins, var, cellIdName)
   consIdName = get_unique_col_name(df_margins,"consId")
   df_margins[consIdName] = range(len(df_margins))
   
   # create a mapping of each margin identifer to each aggregated value 
-  constraint_values = df_margins[[consIdName,var]].to_dict()
   constraint_values = {}
   for row in df_margins[[consIdName,var]].iterrows():
     constraint_values[row[0]] = row[1]
     
   # create a mapping of each margin identifer to a list of each cell identifer adding up to it
-  constraints = margin_relations(by_values, by, margins, var,cellIdName)
-  
+  constraints = {}
+  for row in df_margins[[consIdName,cellIdName]].iterrows():
+    constraints[row[0]] = row[1]
+
   #obtain the best rounding
   result = best_first_search(possible_cell_values, initial_values, constraints, constraint_values, NSolutions = 1)
   
