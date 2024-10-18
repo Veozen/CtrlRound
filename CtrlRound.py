@@ -20,8 +20,8 @@ def aggBy(df:pd.DataFrame, by, var, id):
       }).reset_index()
     return df_agg
 
-def aggregate_and_list(df:pd.DataFrame, by, margins, var, id):
 
+def aggregate_and_list(df:pd.DataFrame, by, margins, var, id):
     if by is not None and not isinstance(by,list):
         by = [by]
         
@@ -37,12 +37,10 @@ def aggregate_and_list(df:pd.DataFrame, by, margins, var, id):
         subsets = [sub for sub in subsets if sub in margins]
         
     df_out = pd.DataFrame()
-
     for sub in subsets:
         subAgg = aggBy(df, by=sub, var=var, id)
         df_out = pd.concat([df_out,subAgg],ignore_index=True)
-
-    return df_out  
+    return df_out   
 
 
 def get_unique_col_name(df,base_name):
