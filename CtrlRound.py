@@ -6,20 +6,18 @@ from distance import define_margin_distance, define_interior_distance
 
 def aggBy(df:pd.DataFrame, by, var, id):
     #aggregate a grouped dataframe
-
     if by is None or not by:
-        #when no group by is specified, .agg returns a series. Here a dataframe is returned instead
-        df_agg = df.agg({
-      var: "sum", 
-      id: lambda x: x.tolist()
-      })).to_frame().T
-
+        sum_value = df[var].sum()
+        contributing_rows = list(df.id)
+        df_agg = pd.DataFrame({
+            var: [sum_value],
+            id: [contributing_rows]
+        })
     else:
         df_agg = df.groupby(by).agg({
       var: "sum", 
       id: lambda x: x.tolist()
-      })).reset_index()
-
+      }).reset_index()
     return df_agg
 
 def aggregate_and_list(df:pd.DataFrame, by, margins, var, id):
