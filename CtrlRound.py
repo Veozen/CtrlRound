@@ -128,5 +128,9 @@ def CtrlRound(df_in, by, var, margins=None, roundingBase=1):
   margins     = margins[[*by,var]]
   df_out = df_out.drop(cellIdName,axis=1)
   
-  return df_out, margins , objectives
+  by_values = by_values.drop(cellIdName,axis=1)
+  df_margins = df_margins.drop(cellIdName,axis=1)
+  df_margins = df_margins.drop(consIdName,axis=1)
+  
+  return by_values, df_margins, df_out, margins , objectives
 
