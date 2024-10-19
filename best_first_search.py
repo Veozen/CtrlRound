@@ -53,7 +53,7 @@ def best_first_search(possible_cell_values, initial_values, constraints, constra
                   new_partial_solution[cell_id] = value
                   
                   new_paramList                 = [new_partial_solution,initial_values,constraints,constraint_values]
-                  new_distances                 = [f(*paramList) for f in distanceFuncs]
+                  new_distances                 = [f(*new_paramList) for f in distanceFuncs]
                   
                   # a unique counter is stored in the state so that the heap will never attempt at comparing partial soutions distionaries as this would result in an error
                   # if both distances are the same as another element in the heap, at least the counter will be different and used to order the elements
