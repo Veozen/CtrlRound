@@ -112,7 +112,7 @@ def CtrlRound(df_in, by, var, margins=None, roundingBase=1):
     constraints[row[consIdName]] = row[cellIdName]
   
   # define out distances measures
-  calculate_margin_max_distance   = define_margin_distance(max)
+  calculate_margin_max_distance   = define_margin_distance(max,normalized=False)
   calculate_margin_sum_distance   = define_margin_distance(sum)
   calculate_interior_sum_distance = define_interior_distance(sum)
   distanceFuncs                   = [calculate_margin_max_distance, calculate_margin_sum_distance, calculate_interior_sum_distance]
