@@ -26,7 +26,7 @@ def aggregate_and_list(df:pd.DataFrame, by, margins=None, var=None, id=None):
         
     subsets=[]
     if by is not None:
-        for i in range(0,len(by)+1):
+        for i in range(0,len(by)):
             comb = combinations(by,i)
             subsets = subsets + [list(c) for c in comb]
     else:
@@ -41,6 +41,7 @@ def aggregate_and_list(df:pd.DataFrame, by, margins=None, var=None, id=None):
         df_out = pd.concat([df_out,subAgg],ignore_index=True)
     return df_out  
 
+
 def get_unique_col_name(df,base_name):
   # Generate a unique column name
   i = 1
@@ -52,18 +53,18 @@ def get_unique_col_name(df,base_name):
   return newName
     
 def CtrlRound(df_in, by, margins, var, roundingBase=1):
-"""
-Aggregate a dataframe and perform controlled rounding of it's entries.
-input:
-  df_in       : pandas dataframe
-  by          : list of column names on which to aggregate the input dataframe
-  margins     : list of list of column name indicating which grouping to aggregate. Can be empty in which case all grouping and subgrouping are aggregated.
-  var         : column to be aggregated
-  roudingBase : the rounding base. Has to be greater than 0.
-  
-output:
-  dataframe with columns listed in the "by" and "var" input parameters.
-"""
+  """
+  Aggregate a dataframe and perform controlled rounding of it's entries.
+  input:
+    df_in       : pandas dataframe
+    by          : list of column names on which to aggregate the input dataframe
+    margins     : list of list of column name indicating which grouping to aggregate. Can be empty in which case all grouping and subgrouping are aggregated.
+    var         : column to be aggregated
+    roudingBase : the rounding base. Has to be greater than 0.
+    
+  output:
+    dataframe with columns listed in the "by" and "var" input parameters.
+  """
   # aggregate "var" by "by" columns in case there are duplicates in the input to make sure we have a table with signle entries per cell
   by_values   = df_in[by].groupby(by).sum(var)
   
@@ -90,11 +91,10 @@ output:
   possible_cell_values              = {}
   for row in possible_values[[cellIdName,lower,upper]].iterrows():
     # if upper is the same as lower, generate only one possibility
-    if row[1] ! = row[2]:
+    if row[1] != row[2]:
       possible_cell_values[row[0]]  = [row[1],row[2]]
     else:
       possible_cell_values[row[0]]  = [row[1]]
-
   # get margins of the input table
   df_margins              = aggregate_and_list(by_values, by, margins, var, cellIdName)
   consIdName              = get_unique_col_name(df_margins,"consId")
@@ -109,13 +109,11 @@ output:
   constraints           = {}
   for row in df_margins[[consIdName,cellIdName]].iterrows():
     constraints[row[0]] = row[1]
-
   # define out distances measures
   calculate_margin_max_distance   = define_margin_distance(max)
   calculate_margin_sum_distance   = define_margin_distance(sum)
   calculate_interior_sum_distance = define_interior_distance(sum)
   distanceFuncs                   = [calculate_margin_max_distance, calculate_margin_sum_distance, calculate_interior_sum_distance]
-
   # obtain the best rounding
   result = best_first_search(possible_cell_values, initial_values, constraints, constraint_values, distanceFuncs, NSolutions = 1)
   
@@ -125,4 +123,3 @@ output:
   df_out.drop(cellIdName)
   
   return df_out
-
