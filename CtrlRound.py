@@ -51,6 +51,7 @@ def get_unique_col_name(df,base_name):
       i += 1   
   return newName
 
+
 def CtrlRound(df_in, by, var, margins=None, roundingBase=1):
   """
   Aggregate a dataframe and perform controlled rounding of it's entries.
@@ -80,20 +81,22 @@ def CtrlRound(df_in, by, var, margins=None, roundingBase=1):
   # create a mapping of each cell identifer to each possible rounded value 
   possible_values           = var_values
   lower_residual            = possible_values[var] % roundingBase
-  possible_values["lower"]  = possible_values[var] - lower_residual
-  possible_values["upper"]  = possible_values["lower"]
+  lower  = get_unique_col_name(by_values,"lower")
+  upper  = get_unique_col_name(by_values,"upper")
   
-  print("check0")
+  possible_values[lower]  = possible_values[var] - lower_residual
+  possible_values[upper]  = possible_values[lower]
+  
   # check if the original value is not already rounded, in which case the upper value should be the same.
-  possible_values["upper"][lower_residual > 0] +=   roundingBase
+  possible_values[upper][lower_residual > 0] +=   roundingBase
   possible_cell_values              = {}
-  for index, row in possible_values[[cellIdName,"lower","upper"]].iterrows():
+  for index, row in possible_values[[cellIdName,lower,upper]].iterrows():
     # if upper is the same as lower, generate only one possibility
-    if row["lower"] != row["upper"]:
-      possible_cell_values[row[cellIdName]]  = [row["lower"],row["upper"]]
+    if row[lower] != row[upper]:
+      possible_cell_values[row[cellIdName]]  = [row[lower],row[upper]]
     else:
-      possible_cell_values[row[cellIdName]]  = [row["lower"]]
-  print("check1")
+      possible_cell_values[row[cellIdName]]  = [row[lower]]
+  
   # get margins of the input table
   df_margins              = aggregate_and_list(by_values, by, var, margins, cellIdName)
   consIdName              = get_unique_col_name(df_margins,"consId")
@@ -103,24 +106,27 @@ def CtrlRound(df_in, by, var, margins=None, roundingBase=1):
   constraint_values           = {}
   for index, row in df_margins[[consIdName,var]].iterrows():
     constraint_values[row[consIdName]] = row[var]
-  print("check2")
+  
   # create a mapping of each margin identifer to a list of each cell identifer adding up to it
   constraints           = {}
   for index, row in df_margins[[consIdName,cellIdName]].iterrows():
     constraints[row[consIdName]] = row[cellIdName]
-  print("check3")
+  
   # define out distances measures
-  calculate_margin_max_distance   = define_margin_distance(max())
-  calculate_margin_sum_distance   = define_margin_distance(sum())
-  calculate_interior_sum_distance = define_interior_distance(sum())
+  calculate_margin_max_distance   = define_margin_distance(max)
+  calculate_margin_sum_distance   = define_margin_distance(sum)
+  calculate_interior_sum_distance = define_interior_distance(sum)
   distanceFuncs                   = [calculate_margin_max_distance, calculate_margin_sum_distance, calculate_interior_sum_distance]
   # obtain the best rounding
   result = best_first_search(possible_cell_values, initial_values, constraints, constraint_values, distanceFuncs, NSolutions = 1)
-  print("check4")
+  solution = result[0][-1]
+  
   # assign the rounded values into a dataframe ready for output
   df_out      = by_values.copy()
-  df_out[var] = by_values[cellIdName].map(result)
-  df_out.drop(cellIdName)
+  
+  df_out[var] = by_values[cellIdName].map(solution)
+  df_out = df_out.drop(cellIdName,axis=1)
   
   return df_out
+
 
