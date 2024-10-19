@@ -35,4 +35,4 @@ def define_interior_distance(func, normalized=True):
       else:
         return func(abs(partial_solution[cell] - initial_values[cell]) for cell in partial_solution)
       
-  return calculate_margin_distance
+  return calculate_interior_distance
