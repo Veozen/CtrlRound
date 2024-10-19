@@ -51,7 +51,6 @@ def get_unique_col_name(df,base_name):
       i += 1   
   return newName
 
-
 def CtrlRound(df_in, by, var, margins=None, roundingBase=1):
   """
   Aggregate a dataframe and perform controlled rounding of it's entries.
@@ -118,15 +117,16 @@ def CtrlRound(df_in, by, var, margins=None, roundingBase=1):
   calculate_interior_sum_distance = define_interior_distance(sum)
   distanceFuncs                   = [calculate_margin_max_distance, calculate_margin_sum_distance, calculate_interior_sum_distance]
   # obtain the best rounding
-  result = best_first_search(possible_cell_values, initial_values, constraints, constraint_values, distanceFuncs, NSolutions = 1)
-  solution = result[0][-1]
-  
+  result    = best_first_search(possible_cell_values, initial_values, constraints, constraint_values, distanceFuncs, NSolutions = 1)
+  solution  = result[0][-1]
+  objectives= result[0][:-1]
   # assign the rounded values into a dataframe ready for output
   df_out      = by_values.copy()
   
   df_out[var] = by_values[cellIdName].map(solution)
+  margins     = aggregate_and_list(df_out, by, var, margins, cellIdName)
+  margins     = margins[[*by,var]]
   df_out = df_out.drop(cellIdName,axis=1)
   
-  return df_out
-
+  return df_out, margins , objectives
 
