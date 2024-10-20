@@ -1,6 +1,7 @@
 import pandas as pd
 from itertools import combinations
 import functools
+import time
 import distance
 from best_first_search import best_first_search
 from distance import define_margin_distance, define_interior_distance
