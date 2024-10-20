@@ -3,11 +3,9 @@ def define_margin_distance(func, normalized=True):
   #define the distance function used through the aggregation function used on the margins
   def calculate_margin_distance(partial_solution, initial_values, constraints, constraint_values):
       # merge the solution so far with initial values for the cells where no decision has been taken yet
-      current_values = {}
-      for cell,val in initial_values.items():
-        current_values[cell]=val
-        if cell in partial_solution:
-          current_values[cell]=partial_solution[cell]
+      current_values = initial_values.copy()
+      for cell,val in partial_solution.items():
+          current_values[cell]=val
           
       nCell = len(partial_solution)        
       marginDiscrepancies = []
