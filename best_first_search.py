@@ -16,10 +16,11 @@ def best_first_search(possible_cell_values, initial_values, constraints, constra
     """
     # a unique counter for each partial solution pushed in the heap
     counter         = 0
+    nHeapPurges     = 0
+    nSolPurged      = 0
     
     # number of distance functions passed
     nfuncs = len(distanceFuncs)
-    
     # the size of the heap after trimming
     reset_heap_size = int(reset_heap_fraction * max_heap_size)
     
@@ -43,7 +44,7 @@ def best_first_search(possible_cell_values, initial_values, constraints, constra
           
         # output the N first Solutions found
         if NSolutions > 0 and len(Solutions) == NSolutions:
-          return Solutions
+          return Solutions, counter, nHeapPurges, nSolPurged
           
         # Generate neighbors
         for cell_id in possible_cell_values:
@@ -65,7 +66,10 @@ def best_first_search(possible_cell_values, initial_values, constraints, constra
         #if heap gets too large, cut it in half keeping only the best partial solutions
         if len(pq) > max_heap_size:
           pq.sort(key=lambda x: x[:nfuncs])
+          nSolPurged += len(pq) - reset_heap_size
           pq = pq[:reset_heap_size]
           heapq.heapify(pq)
+          nHeapPurges += 1
         
-    return Solutions
+        
+    return Solutions, counter, nHeapPurges, nSolPurged
