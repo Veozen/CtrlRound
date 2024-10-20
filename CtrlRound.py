@@ -64,8 +64,9 @@ def timer(func):
         return value
     return wrapper_timer
 
+
 @timer
-def CtrlRound(df_in, by, var, margins=None, roundingBase=1):
+def CtrlRound(df_in, by, var, margins=None, roundingBase=1, fixRoundingDist= 0):
   """
   Aggregate a dataframe and perform controlled rounding of it's entries.
   input:
@@ -84,6 +85,7 @@ def CtrlRound(df_in, by, var, margins=None, roundingBase=1):
   cellIdName  = get_unique_col_name(by_values,"cellId")
   # create a unique identifer for each cell of the table
   by_values[cellIdName]     = range(len(by_values))
+  cellId_lst = list(by_values[cellIdName])
   
   # create a mapping of each cell identifer to each value from the table
   var_values                = by_values[[cellIdName,var]].copy()
@@ -94,22 +96,25 @@ def CtrlRound(df_in, by, var, margins=None, roundingBase=1):
   # create a mapping of each cell identifer to each possible rounded value 
   possible_values           = var_values
   lower_residual            = possible_values[var] % roundingBase
-  lower  = get_unique_col_name(by_values,"lower")
-  upper  = get_unique_col_name(by_values,"upper")
+  lower    = get_unique_col_name(by_values,"lower")
+  upper    = get_unique_col_name(by_values,"upper")
+  residual = get_unique_col_name(by_values,"residual")
   
-  possible_values[lower]  = possible_values[var] - lower_residual
-  possible_values[upper]  = possible_values[lower]
+  possible_values[lower]    = possible_values[var] - lower_residual
+  possible_values[upper]    = possible_values[lower] + roundingBase
+  possible_values[residual] = lower_residual
   
-  # check if the original value is not already rounded, in which case the upper value should be the same.
-  possible_values[upper][lower_residual > 0] +=   roundingBase
-  possible_cell_values              = {}
-  for index, row in possible_values[[cellIdName,lower,upper]].iterrows():
+  # check if the original value is not already rounded, in which case the upper value should be the same.  
+  possible_cell_values              = {cellId:[] for cellId in cellId_lst}
+  for index, row in possible_values[[cellIdName,lower,upper,residual]].iterrows():
     # if upper is the same as lower, generate only one possibility
-    if row[lower] != row[upper]:
-      possible_cell_values[row[cellIdName]]  = [row[lower],row[upper]]
-    else:
+    if row[residual] < fixRoundingDist*roundingBase:
       possible_cell_values[row[cellIdName]]  = [row[lower]]
-  
+    elif row[residual] > (1-fixRoundingDist)*roundingBase:
+      possible_cell_values[row[cellIdName]]  = [row[upper]]
+    else:
+      possible_cell_values[row[cellIdName]]  = [row[lower],row[upper]]
+      
   # get margins of the input table
   df_margins              = aggregate_and_list(by_values, by, var, margins, cellIdName)
   consIdName              = get_unique_col_name(df_margins,"consId")
@@ -140,12 +145,14 @@ def CtrlRound(df_in, by, var, margins=None, roundingBase=1):
   df_out[var] = by_values[cellIdName].map(solution)
   margins     = aggregate_and_list(df_out, by, var, margins, cellIdName)
   margins     = margins[[*by,var]]
-  df_out = df_out.drop(cellIdName,axis=1)
+  df_out      = df_out.drop(cellIdName,axis=1)
   
-  by_values = by_values.drop(cellIdName,axis=1)
+  by_values  = by_values.drop(cellIdName,axis=1)
   df_margins = df_margins.drop(cellIdName,axis=1)
   df_margins = df_margins.drop(consIdName,axis=1)
   
   output = {"input_table":by_values, "input_margins":df_margins, "rounded_table":df_out, "rounded_margins" :margins, "objectives":objectives}
   return output
+
+
 
