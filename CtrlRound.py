@@ -132,5 +132,6 @@ def CtrlRound(df_in, by, var, margins=None, roundingBase=1):
   df_margins = df_margins.drop(cellIdName,axis=1)
   df_margins = df_margins.drop(consIdName,axis=1)
   
-  return by_values, df_margins, df_out, margins , objectives
+  output = {"input_table":by_values, "input_margins":df_margins, "rounded_table":df_out, "rounded_margins" :margins, "objectives":objectives}
+  return output
 
