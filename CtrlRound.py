@@ -1,5 +1,6 @@
 import pandas as pd
 from itertools import combinations
+import functools
 import distance
 from best_first_search import best_first_search
 from distance import define_margin_distance, define_interior_distance
@@ -51,6 +52,18 @@ def get_unique_col_name(df,base_name):
       i += 1   
   return newName
 
+def timer(func):
+    @functools.wraps(func)
+    def wrapper_timer(*args, **kwargs):
+        tic = time.perf_counter()
+        value = func(*args, **kwargs)
+        toc = time.perf_counter()
+        elapsed_time = toc - tic
+        print(f"Elapsed time: {elapsed_time:0.4f} seconds")
+        return value
+    return wrapper_timer
+
+@timer
 def CtrlRound(df_in, by, var, margins=None, roundingBase=1):
   """
   Aggregate a dataframe and perform controlled rounding of it's entries.
