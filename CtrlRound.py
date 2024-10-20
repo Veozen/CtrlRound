@@ -66,7 +66,7 @@ def timer(func):
 
 
 @timer
-def CtrlRound(df_in, by, var, margins=None, roundingBase=1, fixRoundingDist= 0):
+def CtrlRound(df_in, by, var, margins=None, roundingBase=1, fixRoundingDist= 0, maxHeapSize= 1000):
   """
   Aggregate a dataframe and perform controlled rounding of it's entries.
   input:
@@ -96,9 +96,9 @@ def CtrlRound(df_in, by, var, margins=None, roundingBase=1, fixRoundingDist= 0):
   # create a mapping of each cell identifer to each possible rounded value 
   possible_values           = var_values
   lower_residual            = possible_values[var] % roundingBase
-  lower    = get_unique_col_name(by_values,"lower")
-  upper    = get_unique_col_name(by_values,"upper")
-  residual = get_unique_col_name(by_values,"residual")
+  lower  = get_unique_col_name(by_values,"lower")
+  upper  = get_unique_col_name(by_values,"upper")
+  residual  = get_unique_col_name(by_values,"residual")
   
   possible_values[lower]    = possible_values[var] - lower_residual
   possible_values[upper]    = possible_values[lower] + roundingBase
@@ -136,7 +136,7 @@ def CtrlRound(df_in, by, var, margins=None, roundingBase=1, fixRoundingDist= 0):
   calculate_interior_sum_distance = define_interior_distance(sum)
   distanceFuncs                   = [calculate_margin_max_distance, calculate_margin_sum_distance, calculate_interior_sum_distance]
   # obtain the best rounding
-  result    = best_first_search(possible_cell_values, initial_values, constraints, constraint_values, distanceFuncs, NSolutions = 1)
+  result    , nIterations, nHeapPurges, nSolPurged = best_first_search(possible_cell_values, initial_values, constraints, constraint_values, distanceFuncs, NSolutions = 1, max_heap_size= maxHeapSize )
   solution  = result[0][-1]
   objectives= result[0][:-1]
   # assign the rounded values into a dataframe ready for output
@@ -145,13 +145,19 @@ def CtrlRound(df_in, by, var, margins=None, roundingBase=1, fixRoundingDist= 0):
   df_out[var] = by_values[cellIdName].map(solution)
   margins     = aggregate_and_list(df_out, by, var, margins, cellIdName)
   margins     = margins[[*by,var]]
-  df_out      = df_out.drop(cellIdName,axis=1)
+  df_out = df_out.drop(cellIdName,axis=1)
   
-  by_values  = by_values.drop(cellIdName,axis=1)
+  by_values = by_values.drop(cellIdName,axis=1)
   df_margins = df_margins.drop(cellIdName,axis=1)
   df_margins = df_margins.drop(consIdName,axis=1)
   
-  output = {"input_table":by_values, "input_margins":df_margins, "rounded_table":df_out, "rounded_margins" :margins, "objectives":objectives}
+  # report information from the optimization process
+  opt_report = {}
+  opt_report["nIterations"] = nIterations
+  opt_report["nHeapPurges"] = nHeapPurges
+  opt_report["nSolPurged"] = nSolPurged
+    
+  output = {"input_table":by_values, "input_margins":df_margins, "rounded_table":df_out, "rounded_margins" :margins, "objectives":objectives, "opt_report": opt_report}
   return output
 
 
