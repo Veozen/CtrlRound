@@ -79,6 +79,11 @@ def CtrlRound(df_in, by, var, margins=None, roundingBase=1, fixRoundingDist= 0, 
   output:
     dataframe with columns listed in the "by" and "var" input parameters.
   """
+  
+  nCells      = 0
+  nMargins    = 0
+  nFixedCells = 0
+  
   # aggregate "var" by "by" columns in case there are duplicates in the input to make sure we have a table with signle entries per cell
   by_values   = df_in.groupby(by).sum(var).reset_index()
   # get a unique name not already present in the dataframe to store cell identifier
@@ -86,6 +91,7 @@ def CtrlRound(df_in, by, var, margins=None, roundingBase=1, fixRoundingDist= 0, 
   # create a unique identifer for each cell of the table
   by_values[cellIdName]     = range(len(by_values))
   cellId_lst = list(by_values[cellIdName])
+  nCells = len(cellId_lst)
   
   # create a mapping of each cell identifer to each value from the table
   var_values                = by_values[[cellIdName,var]].copy()
@@ -94,11 +100,11 @@ def CtrlRound(df_in, by, var, margins=None, roundingBase=1, fixRoundingDist= 0, 
     initial_values[row[cellIdName]]  = row[var]
   
   # create a mapping of each cell identifer to each possible rounded value 
-  possible_values           = var_values
-  lower_residual            = possible_values[var] % roundingBase
-  lower  = get_unique_col_name(by_values,"lower")
-  upper  = get_unique_col_name(by_values,"upper")
-  residual  = get_unique_col_name(by_values,"residual")
+  possible_values = var_values
+  lower_residual  = possible_values[var] % roundingBase
+  lower           = get_unique_col_name(by_values,"lower")
+  upper           = get_unique_col_name(by_values,"upper")
+  residual        = get_unique_col_name(by_values,"residual")
   
   possible_values[lower]    = possible_values[var] - lower_residual
   possible_values[upper]    = possible_values[lower] + roundingBase
@@ -110,8 +116,10 @@ def CtrlRound(df_in, by, var, margins=None, roundingBase=1, fixRoundingDist= 0, 
     # if upper is the same as lower, generate only one possibility
     if row[residual] < fixRoundingDist*roundingBase:
       possible_cell_values[row[cellIdName]]  = [row[lower]]
+      nFixedCells += 1
     elif row[residual] > (1-fixRoundingDist)*roundingBase:
       possible_cell_values[row[cellIdName]]  = [row[upper]]
+      nFixedCells += 1
     else:
       possible_cell_values[row[cellIdName]]  = [row[lower],row[upper]]
       
@@ -119,6 +127,7 @@ def CtrlRound(df_in, by, var, margins=None, roundingBase=1, fixRoundingDist= 0, 
   df_margins              = aggregate_and_list(by_values, by, var, margins, cellIdName)
   consIdName              = get_unique_col_name(df_margins,"consId")
   df_margins[consIdName]  = range(len(df_margins))
+  nMargins = len(df_margins)
   
   # create a mapping of each margin identifer to each aggregated value 
   constraint_values           = {}
@@ -137,28 +146,30 @@ def CtrlRound(df_in, by, var, margins=None, roundingBase=1, fixRoundingDist= 0, 
   distanceFuncs                   = [calculate_margin_max_distance, calculate_margin_sum_distance, calculate_interior_sum_distance]
   # obtain the best rounding
   result    , nIterations, nHeapPurges, nSolPurged = best_first_search(possible_cell_values, initial_values, constraints, constraint_values, distanceFuncs, NSolutions = 1, max_heap_size= maxHeapSize )
-  solution  = result[0][-1]
-  objectives= result[0][:-1]
+  solution    = result[0][-1]
+  objectives  = result[0][:-1]
   # assign the rounded values into a dataframe ready for output
   df_out      = by_values.copy()
   
   df_out[var] = by_values[cellIdName].map(solution)
   margins     = aggregate_and_list(df_out, by, var, margins, cellIdName)
   margins     = margins[[*by,var]]
-  df_out = df_out.drop(cellIdName,axis=1)
+  df_out      = df_out.drop(cellIdName,axis=1)
   
-  by_values = by_values.drop(cellIdName,axis=1)
-  df_margins = df_margins.drop(cellIdName,axis=1)
-  df_margins = df_margins.drop(consIdName,axis=1)
+  by_values   = by_values.drop(cellIdName,axis=1)
+  df_margins  = df_margins.drop(cellIdName,axis=1)
+  df_margins  = df_margins.drop(consIdName,axis=1)
   
   # report information from the optimization process
-  opt_report = {}
+  opt_report                = {}
   opt_report["nIterations"] = nIterations
   opt_report["nHeapPurges"] = nHeapPurges
-  opt_report["nSolPurged"] = nSolPurged
+  opt_report["nSolPurged"]  = nSolPurged
     
-  output = {"input_table":by_values, "input_margins":df_margins, "rounded_table":df_out, "rounded_margins" :margins, "objectives":objectives, "opt_report": opt_report}
+  output = {"input_table":by_values, "input_margins":df_margins, "rounded_table":df_out, "rounded_margins" :margins, "objectives":objectives, "opt_report": opt_report, "nCells": nCells, "nMargins":nMargins, "nFixedCells": nFixedCells}
   return output
+
+
 
 
 
