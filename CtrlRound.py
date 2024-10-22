@@ -5,15 +5,22 @@ import time
 import distance
 from best_first_search import best_first_search
 from distance import define_margin_distance, define_interior_distance
+import pandas as pd
+from itertools import combinations
+import functools
+import time
+import distance
+from best_first_search import best_first_search
+from distance import define_margin_distance, define_interior_distance
 
-def aggBy(df:pd.DataFrame, by, var, id):
+def agg_by(df:pd.DataFrame, by, var, id):
     #aggregate a grouped dataframe
     if by is None or not by:
         sum_value = df[var].sum()
         contributing_rows = list(df[id])
         df_agg = pd.DataFrame({
             var: [sum_value],
-            id: [contributing_rows]
+            id : [contributing_rows]
         })
     else:
         df_agg = df.groupby(by).agg({
@@ -28,8 +35,8 @@ def aggregate_and_list(df:pd.DataFrame, by, var=None, margins=None, id=None):
         
     subsets=[]
     if by is not None:
-        for i in range(0,len(by)):
-            comb = combinations(by,i)
+        for i in range(0, len(by)):
+            comb = combinations(by, i)
             subsets = subsets + [list(c) for c in comb]
     else:
         subsets=[[]]
@@ -39,19 +46,19 @@ def aggregate_and_list(df:pd.DataFrame, by, var=None, margins=None, id=None):
         
     df_out = pd.DataFrame()
     for sub in subsets:
-        subAgg = aggBy(df, by=sub, var=var, id=id)
-        df_out = pd.concat([df_out,subAgg],ignore_index=True)
+        sub_agg = agg_by(df, by=sub, var=var, id=id)
+        df_out = pd.concat([df_out,sub_agg], ignore_index=True)
     return df_out  
 
 
-def get_unique_col_name(df,base_name):
+def get_unique_col_name(df, base_name):
   # Generate a unique column name
   i = 1
-  newName = base_name
-  while newName in df.columns:
-      newName = f"{base_name}_{i}"
+  new_name = base_name
+  while new_name in df.columns:
+      new_name = f"{base_name}_{i}"
       i += 1   
-  return newName
+  return new_name
 
 def timer(func):
     @functools.wraps(func)
@@ -64,9 +71,8 @@ def timer(func):
         return value
     return wrapper_timer
 
-
 @timer
-def CtrlRound(df_in, by, var, margins=None, roundingBase=1, fixRoundingDist= 0, maxHeapSize= 1000):
+def ctrl_round(df_in, by, var, margins=None, rounding_base=1, fix_rounding_dist= 0, max_heap_size= 1000):
   """
   Aggregate a dataframe and perform controlled rounding of it's entries.
   input:
@@ -75,10 +81,10 @@ def CtrlRound(df_in, by, var, margins=None, roundingBase=1, fixRoundingDist= 0, 
     margins         : list of list of column name indicating which grouping to aggregate. Can be empty in which case all grouping and subgrouping are aggregated. 
     Controlling the rounding on a subset of margins will improve the run-time but will leave the other margins free to potentialy deviate far from their original values.
     var             : column to be aggregated
-    roudingBase     : the rounding base. Has to be greater than 0.
-    fixRoundingDist : if an entry is close to a rounded value by p% of the rounding base, round that entry to it's closest rounded value and remove the other rounded value from consideration for that entry. 
+    rounding_base     : the rounding base. Has to be greater than 0.
+    fix_rounding_dist : if an entry is close to a rounded value by p% of the rounding base, round that entry to it's closest rounded value and remove the other rounded value from consideration for that entry. 
     This reduces the serach space and run time at the cost of the quality of the solution.
-    maxHeapSize     : the maximum size the heap. Has to be greater than 2. Default is 1000. 
+    max_heap_size     : the maximum size the heap. Has to be greater than 2. Default is 1000. 
     A smaller heap will lead to faster run-time at the cost of the quality of the solution.
     
   output:
@@ -89,105 +95,109 @@ def CtrlRound(df_in, by, var, margins=None, roundingBase=1, fixRoundingDist= 0, 
     rounded_margins : 
     objectives      : the objective functions value for the solution
     opt_report      : a dictionary containing information about the optimisation process with folowing keys:
-      nIterations   : the number of partial solution expanded
-      nHeapPurges   : the number of times the heap was purged, keeping the best solution so far
-      nSolPurged    : the total number of partial solution that got purged and never further expanded
-    nCells          : the number of entries in the input table
-    nMargins        : the number of margin values from the input table 
-    nFixedCells     : the number of cells where the rounding is fixed and not subject to the optimisation process
+      n_iterations   : the number of partial solution expanded
+      n_heap_purges   : the number of times the heap was purged, keeping the best solution so far
+      n_sol_purged    : the total number of partial solution that got purged and never further expanded
+    n_cells          : the number of entries in the input table
+    n_margins        : the number of margin values from the input table 
+    n_fixed_cells     : the number of cells where the rounding is fixed and not subject to the optimisation process
 
   """
   
-  nCells      = 0
-  nMargins    = 0
-  nFixedCells = 0
+  n_cells       = 0
+  n_margins     = 0
+  n_fixed_cells = 0
   
   # aggregate "var" by "by" columns in case there are duplicates in the input to make sure we have a table with signle entries per cell
-  by_values   = df_in.groupby(by).sum(var).reset_index()
+  by_values               = df_in.groupby(by).sum(var).reset_index()
   # get a unique name not already present in the dataframe to store cell identifier
-  cellIdName  = get_unique_col_name(by_values,"cellId")
+  cell_id_name            = get_unique_col_name(by_values,"cellId")
   # create a unique identifer for each cell of the table
-  by_values[cellIdName]     = range(len(by_values))
-  cellId_lst = list(by_values[cellIdName])
-  nCells = len(cellId_lst)
+  by_values[cell_id_name] = range(len(by_values))
+  cellId_lst              = list(by_values[cell_id_name])
+  n_cells                 = len(cellId_lst)
   
   # create a mapping of each cell identifer to each value from the table
-  var_values                = by_values[[cellIdName,var]].copy()
+  var_values                = by_values[[cell_id_name,var]].copy()
   initial_values            = {}
   for index, row in var_values.iterrows():
-    initial_values[row[cellIdName]]  = row[var]
+    initial_values[row[cell_id_name]]  = row[var]
   
   # create a mapping of each cell identifer to each possible rounded value 
   possible_values = var_values
-  lower_residual  = possible_values[var] % roundingBase
+  lower_residual  = possible_values[var] % rounding_base
   lower           = get_unique_col_name(by_values,"lower")
   upper           = get_unique_col_name(by_values,"upper")
   residual        = get_unique_col_name(by_values,"residual")
   
   possible_values[lower]    = possible_values[var] - lower_residual
-  possible_values[upper]    = possible_values[lower] + roundingBase
+  possible_values[upper]    = possible_values[lower] + rounding_base
   possible_values[residual] = lower_residual
   
   # check if the original value is not already rounded, in which case the upper value should be the same.  
-  possible_cell_values              = {cellId:[] for cellId in cellId_lst}
-  for index, row in possible_values[[cellIdName,lower,upper,residual]].iterrows():
+  possible_cell_values      = {cellId:[] for cellId in cellId_lst}
+  for index, row in possible_values[[cell_id_name, lower, upper, residual]].iterrows():
     # if upper is the same as lower, generate only one possibility
-    if row[residual] < fixRoundingDist*roundingBase:
-      possible_cell_values[row[cellIdName]]  = [row[lower]]
-      nFixedCells += 1
-    elif row[residual] > (1-fixRoundingDist)*roundingBase:
-      possible_cell_values[row[cellIdName]]  = [row[upper]]
-      nFixedCells += 1
+    if row[residual] < fix_rounding_dist * rounding_base:
+      possible_cell_values[row[cell_id_name]]  = [row[lower]]
+      n_fixed_cells += 1
+    elif row[residual] > (1-fix_rounding_dist) * rounding_base:
+      possible_cell_values[row[cell_id_name]]  = [row[upper]]
+      n_fixed_cells += 1
     else:
-      possible_cell_values[row[cellIdName]]  = [row[lower],row[upper]]
+      possible_cell_values[row[cell_id_name]]  = [row[lower], row[upper]]
       
   # get margins of the input table
-  df_margins              = aggregate_and_list(by_values, by, var, margins, cellIdName)
-  consIdName              = get_unique_col_name(df_margins,"consId")
-  df_margins[consIdName]  = range(len(df_margins))
-  nMargins = len(df_margins)
+  df_margins                = aggregate_and_list(by_values, by, var, margins, cell_id_name)
+  cons_id_name              = get_unique_col_name(df_margins,"consId")
+  df_margins[cons_id_name]  = range(len(df_margins))
+  n_margins                 = len(df_margins)
   
   # create a mapping of each margin identifer to each aggregated value 
   constraint_values           = {}
-  for index, row in df_margins[[consIdName,var]].iterrows():
-    constraint_values[row[consIdName]] = row[var]
+  for index, row in df_margins[[cons_id_name, var]].iterrows():
+    constraint_values[row[cons_id_name]] = row[var]
   
   # create a mapping of each margin identifer to a list of each cell identifer adding up to it
   constraints           = {}
-  for index, row in df_margins[[consIdName,cellIdName]].iterrows():
-    constraints[row[consIdName]] = row[cellIdName]
+  for index, row in df_margins[[cons_id_name,cell_id_name]].iterrows():
+    constraints[row[cons_id_name]] = row[cell_id_name]
   
   # define out distances measures
-  calculate_margin_max_distance   = define_margin_distance(max,normalized=False)
+  calculate_margin_max_distance   = define_margin_distance(max, normalized=False)
   calculate_margin_sum_distance   = define_margin_distance(sum)
   calculate_interior_sum_distance = define_interior_distance(sum)
   distanceFuncs                   = [calculate_margin_max_distance, calculate_margin_sum_distance, calculate_interior_sum_distance]
   # obtain the best rounding
-  result    , nIterations, nHeapPurges, nSolPurged = best_first_search(possible_cell_values, initial_values, constraints, constraint_values, distanceFuncs, NSolutions = 1, max_heap_size= maxHeapSize )
+  result    , n_iterations, n_heap_purges, n_sol_purged = best_first_search(possible_cell_values, initial_values, constraints, constraint_values, distanceFuncs, NSolutions = 1, max_heap_size= max_heap_size )
   solution    = result[0][-1]
   objectives  = result[0][:-1]
   # assign the rounded values into a dataframe ready for output
   df_out      = by_values.copy()
   
-  df_out[var] = by_values[cellIdName].map(solution)
-  margins     = aggregate_and_list(df_out, by, var, margins, cellIdName)
+  df_out[var] = by_values[cell_id_name].map(solution)
+  margins     = aggregate_and_list(df_out, by, var, margins, cell_id_name)
   margins     = margins[[*by,var]]
-  df_out      = df_out.drop(cellIdName,axis=1)
+  df_out      = df_out.drop(cell_id_name,axis=1)
   
-  by_values   = by_values.drop(cellIdName,axis=1)
-  df_margins  = df_margins.drop(cellIdName,axis=1)
-  df_margins  = df_margins.drop(consIdName,axis=1)
+  by_values   = by_values.drop(cell_id_name,axis=1)
+  df_margins  = df_margins.drop(cell_id_name,axis=1)
+  df_margins  = df_margins.drop(cons_id_name,axis=1)
   
   # report information from the optimization process
-  opt_report                = {}
-  opt_report["nIterations"] = nIterations
-  opt_report["nHeapPurges"] = nHeapPurges
-  opt_report["nSolPurged"]  = nSolPurged
+  opt_report                  = {}
+  opt_report["n_iterations"]  = n_iterations
+  opt_report["n_heap_purges"] = n_heap_purges
+  opt_report["n_sol_purged"]  = n_sol_purged
     
-  output = {"input_table":by_values, "input_margins":df_margins, "rounded_table":df_out, "rounded_margins" :margins, "objectives":objectives, "opt_report": opt_report, "nCells": nCells, "nMargins":nMargins, "nFixedCells": nFixedCells}
+  output = {"input_table"     : by_values, \
+            "input_margins"   : df_margins, \
+            "rounded_table"   : df_out, \
+            "rounded_margins" : margins, \
+            "objectives"      : objectives, \
+            "opt_report"      : opt_report, \
+            "n_cells"         : n_cells, \
+            "n_margins"       : n_margins, \
+            "n_fixed_cells"   : n_fixed_cells}
   return output
-
-
-
-
 
