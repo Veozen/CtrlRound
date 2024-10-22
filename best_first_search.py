@@ -8,8 +8,8 @@ def best_first_search(possible_cell_values, initial_values, constraints, constra
       initial_values        : dictionary of initial values for each decision variable
       constraints           : dictionary of each contraints to a list of decison variables that aggregate to that constraint's value
       constraint_values     : dictionary of each contraints to the value they shopudl aggregate to
-      n_solutions            : the number of solutions to output. The first solutions found.
-      distance_funcs         : list of functions that will be used to calculation a lsit of distances to associate with a current (partial) solution
+      n_solutions           : the number of solutions to output. The first solutions found.
+      distance_funcs        : list of functions that will be used to calculation a lsit of distances to associate with a current (partial) solution
       max_heap_size         : the maximum size the heap can be. If reached, half the best solutions will be kept.
       reset_heap_fraction   : When the heap reaches it's maximum size, it is trimmed to keep only the most promising solution. This parameter determines the size of the heap after being trimmed as a fraction of the maximum size. 
       This parameter has to be between 0 and 1. The higher the value, the more often heap timming occurs. Each trim inceases run-time.
