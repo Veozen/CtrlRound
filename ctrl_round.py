@@ -103,7 +103,23 @@ def ctrl_round(df_in, by, var, margins=None, rounding_base=1, fix_rounding_dist=
     n_fixed_cells     : the number of cells where the rounding is fixed and not subject to the optimisation process
 
   """
-  
+  # check input parameters
+  if rounding_base < 0:
+    print("Error: rounding_base has to be greater than 0")
+    return
+    
+  if max_heap_size < 2:
+    print("Error: max_heap_size has to be greater than 1")
+    return
+    
+  if fix_rounding_dist < 0:
+    print("Error: fix_rounding_dist has to be greater than 0")
+    return
+    
+  if fix_rounding_dist >= 0.5:
+    print("Error: fix_rounding_dist has to be less than 0")
+    return
+      
   n_cells       = 0
   n_margins     = 0
   n_fixed_cells = 0
