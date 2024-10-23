@@ -48,12 +48,15 @@ Creates a table filled with random values with the desired number of dimensions 
 - scale : the scale of the numbers in the table: 0 < number < scale.
 
 **output:**  
-The generated the table as a pandas dataframe.  
+The generated the table as a pandas dataframe. With columns:
+0,1,2 ... n_dim-1 : each column contains values from 0 to n_cat-1.     
+value : contains a random value between 0 and scale.  
+
 
 ## Example
 
-test= generate_random_table(3,5,scale=2)
-ctrl_round(test, by=[0,1,2], var="value", roundingBase=1, fixRoundingDist=0.1, maxHeapSize=100)
+test = generate_random_table(3,5,scale=2)  
+ctrl_round(test, by=[0,1,2], var="value", roundingBase=1, fixRoundingDist=0.1, maxHeapSize=100)  
 
 ## License
 This project is licensed under the MIT License -
