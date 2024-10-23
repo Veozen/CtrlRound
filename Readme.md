@@ -38,3 +38,13 @@ A dictionary with the following keys:
   - **n_margins**     : the number of margin values from the input table
   - **n_fixed_cells** : the number of cells where the rounding is fixed and not subject to the optimisation process
 
+**generate_random_table(n_dim,n_cat,scale):**  
+Creates a table filled with random values with the desired number of dimensions and number of categories per dimensions.  
+
+**input:**  
+- n_dim : number of dimensions
+- n_cat : number of categories per dimensions
+- scale : the scale of the numbers in the table: 0 < number < scale.
+
+**output:**  
+The generated the table as a pandas dataframe.
