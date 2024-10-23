@@ -47,3 +47,6 @@ Creates a table filled with random values with the desired number of dimensions 
 
 **output:**  
 The generated the table as a pandas dataframe.
+
+## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
