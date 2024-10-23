@@ -2,11 +2,15 @@
 Controlled rounding is a technique used in data publishing to ensure that data released for public use meets specific confidentiality requirements. 
 The process adjusts the data values by rounding them to a predetermined base in a such a way that the margins of the resulting table remain closer to their original values than they would should the table's entries have been simply rounded to their nearest base.  
 
-Here the solution to this problem is found by applying a best-first-search method where the decision is to round up or down each non-margin entry.  
+Here the solution to this problem is found by applying a best-first-search method where the decision is to round up or down each non-margin entry. Three distance functions are used to sort partial solutions. 
+- The max absolute difference between a margin's rounded value and it's original value  
+- The sum absolute difference between a margin's rounded value and it's original value  
+- The sum absolute difference between a table cell's rounded value and it's original value  
+Ties on the first function are resolved by looking at the second and then third one.  
 
 ## Usage  
 
-**ctrl_round(df_in, by, var, margins, rounding_base, fix_rounding_dist, max_heap_size):**
+**ctrl_round(df_in, by, var, margins, rounding_base, fix_rounding_dist, max_heap_size):**  
 Aggregates a dataframe and perform controlled rounding of it's entries.  
 
 **input:**  
