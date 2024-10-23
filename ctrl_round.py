@@ -138,7 +138,7 @@ def ctrl_round(df_in, by, var, margins=None, rounding_base=1, fix_rounding_dist=
   possible_cell_values      = {cellId:[] for cellId in cellId_lst}
   for index, row in possible_values[[cell_id_name, lower, upper, residual]].iterrows():
     # if upper is the same as lower, generate only one possibility
-    if row[residual] < fix_rounding_dist * rounding_base:
+    if row[residual] <= fix_rounding_dist * rounding_base:
       possible_cell_values[row[cell_id_name]]  = [row[lower]]
       n_fixed_cells += 1
     elif row[residual] > (1-fix_rounding_dist) * rounding_base:
