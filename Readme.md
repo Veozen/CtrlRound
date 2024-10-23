@@ -1,7 +1,6 @@
 **ctrl_round(df_in, by, var, margins, rounding_base, fix_rounding_dist, max_heap_size):**  
 Aggregates a dataframe and perform controlled rounding of it's entries.  
 <pre>
-Aggregate a dataframe and perform controlled rounding of it's entries.
 input:
 df_in             : pandas dataframe
 by                : list of column names on which to aggregate the input dataframe
