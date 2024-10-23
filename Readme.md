@@ -1,6 +1,6 @@
 **ctrl_round(df_in, by, var, margins, rounding_base, fix_rounding_dist, max_heap_size):**  
 Aggregates a dataframe and perform controlled rounding of it's entries.  
-"""
+\\\
 Aggregate a dataframe and perform controlled rounding of it's entries.
 input:
 df_in             : pandas dataframe
@@ -29,5 +29,5 @@ n_cells         : the number of entries in the input table
 n_margins       : the number of margin values from the input table 
 n_fixed_cells   : the number of cells where the rounding is fixed and not subject to the optimisation process
 
-"""
+\\\
 
