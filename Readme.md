@@ -6,10 +6,10 @@ Here the solution to this problem is found by applying a best-first-search metho
 
 ## Usage  
 
-### ctrl_round(df_in, by, var, margins, rounding_base, fix_rounding_dist, max_heap_size):
+**ctrl_round(df_in, by, var, margins, rounding_base, fix_rounding_dist, max_heap_size):**
 Aggregates a dataframe and perform controlled rounding of it's entries.  
 
-### Input
+**input:**  
 - **df_in**             : pandas DataFrame
 - **by**                : list of column names on which to aggregate the input DataFrame
 - **margins**           : list of lists of column names indicating which grouping to aggregate. Can be empty, in which case all grouping and subgrouping are aggregated. Controlling the rounding on a subset of margins will improve the run-time but will leave the other margins free to potentially deviate far from their original values.
@@ -18,7 +18,7 @@ Aggregates a dataframe and perform controlled rounding of it's entries.
 - **fix_rounding_dist** : if an entry is close to a rounded value by p% of the rounding base, round that entry to its closest rounded value and remove the other rounded value from consideration for that entry. This reduces the search space and run time at the cost of the quality of the solution.
 - **max_heap_size**     : the maximum size of the heap. Has to be greater than 2. Default is 1000. A smaller heap will lead to faster run-time at the cost of the quality of the solution.
 
-### Output
+**output:**  
 A dictionary with the following keys:
 - **input_table**     : the original input data with columns listed in the "by" and "var" input parameters.
 - **input_margins**   :
