@@ -6,6 +6,7 @@ Here the solution to this problem is found by applying a best-first-search metho
 - The max absolute difference between a margin's rounded value and it's original value  
 - The sum absolute difference between a margin's rounded value and it's original value  
 - The sum absolute difference between a table cell's rounded value and it's original value  
+
 Ties on the first function are resolved by looking at the second and then third one. The first complete solution found is returned.  
 
 ## Usage  
