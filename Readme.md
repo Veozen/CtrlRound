@@ -21,7 +21,7 @@ output:
 > >   n_iterations   : the number of partial solution expanded  
 > >   n_heap_purges  : the number of times the heap was purged, keeping the best solution so far  
 > >   n_sol_purged   : the total number of partial solution that got purged and never further expanded  
->  n_cells         : the number of entries in the input table  
->  n_margins       : the number of margin values from the input table   
->  n_fixed_cells   : the number of cells where the rounding is fixed and not subject to the optimisation process  
+> < n_cells         : the number of entries in the input table  
+> < n_margins       : the number of margin values from the input table   
+> < n_fixed_cells   : the number of cells where the rounding is fixed and not subject to the optimisation process  
 
