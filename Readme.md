@@ -9,8 +9,6 @@ Here the solution to this problem is found by applying a best-first-search metho
 
 Ties on the first function are resolved by looking at the second and then third one. The first complete solution found is returned.  
 
-## Usage  
-
 **ctrl_round(df_in, by, var, margins, rounding_base, fix_rounding_dist, max_heap_size):**  
 Aggregates a dataframe and perform controlled rounding of it's entries.  
 
