@@ -104,7 +104,7 @@ def ctrl_round(df_in, by, var, margins=None, rounding_base=1, fix_rounding_dist=
 
   """
   # check input parameters
-  if rounding_base < 0:
+  if rounding_base <= 0:
     print("Error: rounding_base has to be greater than 0")
     return
     
@@ -113,11 +113,11 @@ def ctrl_round(df_in, by, var, margins=None, rounding_base=1, fix_rounding_dist=
     return
     
   if fix_rounding_dist < 0:
-    print("Error: fix_rounding_dist has to be greater than 0")
+    print("Error: fix_rounding_dist has to be greater than or equal to 0")
     return
     
   if fix_rounding_dist >= 0.5:
-    print("Error: fix_rounding_dist has to be less than 0")
+    print("Error: fix_rounding_dist has to be less than 0.5")
     return
       
   n_cells       = 0
