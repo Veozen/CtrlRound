@@ -32,7 +32,7 @@ A dictionary with the following keys:
 - **objectives**      : the objective function's value for the solution
 - **opt_report**      : a dictionary containing information about the optimisation process with the following keys:
   - **n_iterations**  : the number of partial solutions expanded
-  - **n_heap_purges** : the number of times the heap was purged, keeping the best solution so far
+  - **n_heap_purges** : the number of times the heap was purged, keeping the best solutions so far
   - **n_sol_purged**  : the total number of partial solutions that got purged and never further expanded
   - **n_cells**       : the number of entries in the input table
   - **n_margins**     : the number of margin values from the input table
