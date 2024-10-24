@@ -55,8 +55,8 @@ The generated the table as a pandas dataframe. With columns:
 
 ## Example
 
-test = generate_random_table(3,5,scale=2)  
-ctrl_round(test, by=[0,1,2], var="value", roundingBase=1, fixRoundingDist=0.1, maxHeapSize=100)  
+test = generate_random_table(3, 5, scale=2)  
+ctrl_round(test, by=[0,1,2], var="value", rounding_base=1, fix_rounding_dist=0.1, max_heap_size=100)  
 
 ## License
 This project is licensed under the MIT License -
