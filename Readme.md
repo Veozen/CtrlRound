@@ -11,7 +11,7 @@ Ties on the first function are resolved by looking at the second and then third 
 
 ## Usage 
 
-**ctrl_round(df_in, by, var, margins, rounding_base, fix_rounding_dist, max_heap_size):**  
+**ctrl_round(df_in, by, var, margins, rounding_base, distance_max, fix_rounding_dist, max_heap_size):**  
 Aggregates a dataframe and perform controlled rounding of it's entries.  
 
 **input:**  
@@ -19,16 +19,17 @@ Aggregates a dataframe and perform controlled rounding of it's entries.
 - **by**                : list of column names on which to aggregate the input DataFrame
 - **margins**           : list of lists of column names indicating which grouping to aggregate. Can be empty, in which case all grouping and subgrouping are aggregated. Controlling the rounding on a subset of margins will improve the run-time but will leave the other margins free to potentially deviate far from their original values.
 - **var**               : column to be aggregated
-- **rounding_base**     : the rounding base. Has to be greater than 0.
-- **fix_rounding_dist** : if an entry is close to a rounded value by p% of the rounding base, round that entry to its closest rounded value and remove the other rounded value from consideration for that entry. This reduces the search space and run time at the cost of the quality of the solution.
+- **distance_max**      : whether or not to include the maximum distance in the list of distances used to sort partial solutions. Not including it results in fewer partial solutions expanded and reduces the run-time. Default is False.
+- **rounding_base**     : the rounding base. Has to be greater than 0. Default is 1.
+- **fix_rounding_dist** : if an entry is close to a rounded value by p% of the rounding base, round that entry to its closest rounded value and remove the other rounded value from consideration for that entry. This reduces the search space and run time at the cost of the quality of the solution. Default is 0 which means that cells that are already exactly rounded wont change.
 - **max_heap_size**     : the maximum size of the heap. Has to be greater than 2. Default is 1000. A smaller heap will lead to faster run-time at the cost of the quality of the solution.
 
 **output:**  
 A dictionary with the following keys:
 - **input_table**     : the original input data with columns listed in the "by" and "var" input parameters.
-- **input_margins**   :
+- **input_margins**   : the margins of the input table
 - **rounded_table**   : the rounded solution of input data with columns listed in the "by" and "var" input parameters.
-- **rounded_margins** :
+- **rounded_margins** : the margins of the rounded table
 - **objectives**      : the objective function's value for the solution
 - **opt_report**      : a dictionary containing information about the optimisation process with the following keys:
   - **n_iterations**  : the number of partial solutions expanded
@@ -56,7 +57,7 @@ The generated the table as a pandas dataframe. With columns:
 ## Example
 
 test = generate_random_table(3, 5, scale=2)  
-ctrl_round(test, by=[0,1,2], var="value", rounding_base=1, fix_rounding_dist=0.1, max_heap_size=100)  
+ctrl_round(test, by=[0,1,2], var="value", rounding_base=1, distance_max=False, fix_rounding_dist=0.1, max_heap_size=100)  
 
 ## License
 This project is licensed under the MIT License -
