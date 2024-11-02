@@ -15,32 +15,36 @@ def best_first_search(possible_cell_values, initial_values, constraints, constra
       This parameter has to be between 0 and 1. The higher the value, the more often heap timming occurs. Each trim inceases run-time.
     """
     # a unique counter for each partial solution pushed in the heap
-    counter         = 0
-    n_heap_purges   = 0
-    n_sol_purged    = 0
+    counter           = 0
+    n_heap_purges     = 0
+    n_sol_purged      = 0
     
     # number of distance functions passed
-    nfuncs             = len(distance_funcs)
+    nfuncs          = len(distance_funcs)
     # the size of the heap after trimming
-    reset_heap_size    = int(reset_heap_fraction * max_heap_size)
+    reset_heap_size = int(reset_heap_fraction * max_heap_size)
     
     # Priority queue for Best First Search
-    pq                 = []
+    pq              = []
     
     #the first solution  is the one where no decision has been made yet
     initial_partial_solution  = {}
-    param_list        = [initial_partial_solution,initial_values,constraints,constraint_values]
-    initial_distances = [f(*param_list) for f in distance_funcs]
-    initial_state     = (*initial_distances, counter, initial_partial_solution)
+    param_list                = [initial_partial_solution, initial_values, constraints, constraint_values]
+    initial_distances         = [f(*param_list) for f in distance_funcs]
+    initial_state             = (*initial_distances, counter, initial_partial_solution)
     
     heapq.heappush(pq, initial_state)
     
     Solutions = []
     while pq:
-        current_total_distance, current_margin_distance, current_interior_distance, current_counter, current_partial_solution  = heapq.heappop(pq)
+        current_best_node         = heapq.heappop(pq)
+        current_partial_solution  = current_best_node[-1]
+        current_counter           = current_best_node[-2]
+        current_interior_distance = current_best_node[-3]
+        current_margin_distances  = current_best_node[:-3]
         
         if len(current_partial_solution) == len(initial_values):
-          Solutions.append((current_total_distance,current_margin_distance,current_interior_distance,current_partial_solution))
+          Solutions.append((*current_margin_distances, current_interior_distance ,current_partial_solution))
           
         # output the N first Solutions found
         if n_solutions > 0 and len(Solutions) == n_solutions:
@@ -53,7 +57,7 @@ def best_first_search(possible_cell_values, initial_values, constraints, constra
                   new_partial_solution          = current_partial_solution.copy()
                   new_partial_solution[cell_id] = value
                   
-                  new_param_list                = [new_partial_solution,initial_values,constraints,constraint_values]
+                  new_param_list                = [new_partial_solution,initial_values, constraints, constraint_values]
                   new_distances                 = [f(*new_param_list) for f in distance_funcs]
                   
                   # a unique counter is stored in the state so that the heap will never attempt at comparing partial soutions distionaries as this would result in an error
@@ -73,3 +77,4 @@ def best_first_search(possible_cell_values, initial_values, constraints, constra
         
         
     return Solutions, counter, n_heap_purges, n_sol_purged
+    
