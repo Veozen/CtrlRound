@@ -81,8 +81,8 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, rounding_base=1
     margins           : list of list of column name indicating which grouping to aggregate. Can be empty in which case all grouping and subgrouping are aggregated. 
     Controlling the rounding on a subset of margins will improve the run-time but will leave the other margins free to potentialy deviate far from their original values.
     var               : column to be aggregated
-    rounding_base     : the rounding base. Has to be greater than 0.
-    distance_max      : whether or not to include the maximum distance in the list of distances used to sort partial solutions. Not including it results in fewer partial solutions expanded and reduces the run-time.
+    rounding_base     : the rounding base. Has to be greater than 0. Default is 1.
+    distance_max      : whether or not to include the maximum distance in the list of distances used to sort partial solutions. Not including it reduces the run-time. Default is False.
     fix_rounding_dist : if an entry is close to a rounded value by p% of the rounding base, round that entry to it's closest rounded value and remove the other rounded value from consideration for that entry. 
     This reduces the search space and run-time at the cost of the quality of the solution.
     max_heap_size     : the maximum size the heap. Has to be greater than 2. Default is 1000. 
