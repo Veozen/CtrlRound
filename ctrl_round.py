@@ -72,54 +72,62 @@ def timer(func):
     return wrapper_timer
 
 @timer
-def ctrl_round(df_in, by, var, margins=None, rounding_base=1, fix_rounding_dist= 0, max_heap_size= 1000):
+def ctrl_round(df_in, by, var, margins=None, distance_max=False, rounding_base=1, fix_rounding_dist= 0, max_heap_size= 1000):
   """
   Aggregate a dataframe and perform controlled rounding of it's entries.
   input:
-    df_in           : pandas dataframe
-    by              : list of column names on which to aggregate the input dataframe
-    margins         : list of list of column name indicating which grouping to aggregate. Can be empty in which case all grouping and subgrouping are aggregated. 
+    df_in             : pandas dataframe
+    by                : list of column names on which to aggregate the input dataframe
+    margins           : list of list of column name indicating which grouping to aggregate. Can be empty in which case all grouping and subgrouping are aggregated. 
     Controlling the rounding on a subset of margins will improve the run-time but will leave the other margins free to potentialy deviate far from their original values.
-    var             : column to be aggregated
+    var               : column to be aggregated
     rounding_base     : the rounding base. Has to be greater than 0.
+    distance_max      : whether or not to include the maximum distance in the list of distances used to sort partial solutions. Not including it results in fewer partial solutions expanded and reduces the run-time.
     fix_rounding_dist : if an entry is close to a rounded value by p% of the rounding base, round that entry to it's closest rounded value and remove the other rounded value from consideration for that entry. 
-    This reduces the serach space and run time at the cost of the quality of the solution.
+    This reduces the search space and run-time at the cost of the quality of the solution.
     max_heap_size     : the maximum size the heap. Has to be greater than 2. Default is 1000. 
     A smaller heap will lead to faster run-time at the cost of the quality of the solution.
     
   output:
     A dictionary with following keys:
     input_table     : the original input data with columns listed in the "by" and "var" input parameters.
-    input_margins   : 
+    input_margins   : the margins of the input table
     rounded_table   : the rounded solution of input data with columns listed in the "by" and "var" input parameters.
-    rounded_margins : 
+    rounded_margins : the margins of the rounded table
     objectives      : the objective functions value for the solution
     opt_report      : a dictionary containing information about the optimisation process with folowing keys:
-      n_iterations   : the number of partial solution expanded
-      n_heap_purges   : the number of times the heap was purged, keeping the best solution so far
-      n_sol_purged    : the total number of partial solution that got purged and never further expanded
-    n_cells          : the number of entries in the input table
-    n_margins        : the number of margin values from the input table 
-    n_fixed_cells     : the number of cells where the rounding is fixed and not subject to the optimisation process
+      n_iterations  : the number of partial solution expanded
+      n_heap_purges : the number of times the heap was purged, keeping the best solutions so far
+      n_sol_purged  : the total number of partial solution that got purged and never further expanded
+    n_cells         : the number of entries in the input table
+    n_margins       : the number of margin values from the input table 
+    n_fixed_cells   : the number of cells where the rounding is fixed and not subject to the optimisation process
 
   """
+  
   # check input parameters
   if rounding_base <= 0:
-    print("Error: rounding_base has to be greater than 0")
-    return
+    raise ValueError("rounding_base has to be greater than 0")
     
   if max_heap_size < 2:
-    print("Error: max_heap_size has to be greater than 1")
-    return
+    raise ValueError("max_heap_size has to be greater than 1")
     
   if fix_rounding_dist < 0:
-    print("Error: fix_rounding_dist has to be greater than or equal to 0")
-    return
+    raise ValueError("fix_rounding_dist has to be greater than or equal to 0")
     
   if fix_rounding_dist >= 0.5:
-    print("Error: fix_rounding_dist has to be less than 0.5")
-    return
-      
+    raise ValueError("fix_rounding_dist has to be less than 0.5")
+  
+  if var not in df_in.columns :
+    raise KeyError(f"column '{var}' is not in input dataframe")
+    
+  if df_in.dtypes[var] not in [int,float] :
+    raise TypeError(f"column '{var}' is must be of type int or float")
+  
+  for col in by:
+    if col not in df_in.columns :
+      raise KeyError(f"column '{col}' is not in input dataframe")
+  
   n_cells       = 0
   n_margins     = 0
   n_fixed_cells = 0
@@ -149,6 +157,7 @@ def ctrl_round(df_in, by, var, margins=None, rounding_base=1, fix_rounding_dist=
   possible_values[lower]    = possible_values[var] - lower_residual
   possible_values[upper]    = possible_values[lower] + rounding_base
   possible_values[residual] = lower_residual
+  
   
   # check if the original value is not already rounded, in which case the upper value should be the same.  
   possible_cell_values      = {cellId:[] for cellId in cellId_lst}
@@ -183,29 +192,37 @@ def ctrl_round(df_in, by, var, margins=None, rounding_base=1, fix_rounding_dist=
   calculate_margin_max_distance   = define_margin_distance(max, normalized=False)
   calculate_margin_sum_distance   = define_margin_distance(sum)
   calculate_interior_sum_distance = define_interior_distance(sum)
-  distanceFuncs                   = [calculate_margin_max_distance, calculate_margin_sum_distance, calculate_interior_sum_distance]
+  if distance_max: 
+    distanceFuncs                   = [calculate_margin_max_distance, calculate_margin_sum_distance, calculate_interior_sum_distance]
+  else:
+    distanceFuncs                   = [calculate_margin_sum_distance, calculate_interior_sum_distance]
   # obtain the best rounding
-  result    , n_iterations, n_heap_purges, n_sol_purged = best_first_search(possible_cell_values, initial_values, constraints, constraint_values, distanceFuncs, NSolutions = 1, max_heap_size= max_heap_size )
+  result, n_iterations, n_heap_purges, n_sol_purged = best_first_search(possible_cell_values, initial_values, constraints, constraint_values, distanceFuncs, n_solutions = 1, max_heap_size= max_heap_size )
   solution    = result[0][-1]
   objectives  = result[0][:-1]
   # assign the rounded values into a dataframe ready for output
   df_out      = by_values.copy()
-  
   df_out[var] = by_values[cell_id_name].map(solution)
   margins     = aggregate_and_list(df_out, by, var, margins, cell_id_name)
   margins     = margins[[*by,var]]
-  df_out      = df_out.drop(cell_id_name,axis=1)
   
+  #clean up the output
+  df_out      = df_out.drop(cell_id_name,axis=1)
   by_values   = by_values.drop(cell_id_name,axis=1)
   df_margins  = df_margins.drop(cell_id_name,axis=1)
   df_margins  = df_margins.drop(cons_id_name,axis=1)
   
+  #if the maximum distance was not used to sort partial solutions, provide that distance in the report anyway
+  if not distance_max: 
+    max_distance = calculate_margin_max_distance(solution, initial_values, constraints, constraint_values)
+    objectives = (max_distance,*objectives)
+    
   # report information from the optimization process
   opt_report                  = {}
   opt_report["n_iterations"]  = n_iterations
   opt_report["n_heap_purges"] = n_heap_purges
   opt_report["n_sol_purged"]  = n_sol_purged
-    
+  
   output = {"input_table"     : by_values, \
             "input_margins"   : df_margins, \
             "rounded_table"   : df_out, \
@@ -215,5 +232,6 @@ def ctrl_round(df_in, by, var, margins=None, rounding_base=1, fix_rounding_dist=
             "n_cells"         : n_cells, \
             "n_margins"       : n_margins, \
             "n_fixed_cells"   : n_fixed_cells}
+            
   return output
 
