@@ -1,4 +1,25 @@
 import heapq
+import sys
+
+def update_progress(progress ):
+    barLength : int = 10 # Modify this to change the length of the progress bar
+    status    : str = ""
+    if isinstance(progress, int):
+        progress = float(progress)
+    if not isinstance(progress, float):
+        progress = 0
+        status = "error: progress var must be float\r\n"
+    if progress < 0:
+        progress = 0
+        status = "Halt...\r\n"
+    if progress >= 1:
+        progress = 1
+        status = "Done...\r\n"
+    block : int = int(round(barLength*progress))
+    text  : str = "\rProgress ".ljust(26) + " : " + "[{0}] {1}% {2}".format( "#"*block + "-"*(barLength-block), round(progress*100,2), status)
+    sys.stdout.write(text)
+    sys.stdout.flush()
+    
 
 def best_first_search(possible_cell_values, initial_values, constraints, constraint_values, distance_funcs, n_solutions=0, max_heap_size=1000, reset_heap_fraction=0.75):
     """
@@ -32,6 +53,7 @@ def best_first_search(possible_cell_values, initial_values, constraints, constra
     param_list                = [initial_partial_solution, initial_values, constraints, constraint_values]
     initial_distances         = [f(*param_list) for f in distance_funcs]
     initial_state             = (*initial_distances, counter, initial_partial_solution)
+    longest_partial_solution  = 0
     
     heapq.heappush(pq, initial_state)
     
@@ -40,11 +62,16 @@ def best_first_search(possible_cell_values, initial_values, constraints, constra
         current_best_node         = heapq.heappop(pq)
         current_partial_solution  = current_best_node[-1]
         current_counter           = current_best_node[-2]
-        current_interior_distance = current_best_node[-3]
-        current_margin_distances  = current_best_node[:-3]
+        current_distances         = current_best_node[:-2]
         
+        longest_partial_solution = max(longest_partial_solution, len(current_partial_solution))
+        
+        #update progress bar
+        update_progress(longest_partial_solution/ len(initial_values)  )
+        
+        #if the partial solution is complete, store it with objective functions
         if len(current_partial_solution) == len(initial_values):
-          Solutions.append((*current_margin_distances, current_interior_distance ,current_partial_solution))
+          Solutions.append((*current_distances, current_partial_solution))
           
         # output the N first Solutions found
         if n_solutions > 0 and len(Solutions) == n_solutions:
@@ -77,4 +104,3 @@ def best_first_search(possible_cell_values, initial_values, constraints, constra
         
         
     return Solutions, counter, n_heap_purges, n_sol_purged
-    
