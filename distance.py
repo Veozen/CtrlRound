@@ -33,3 +33,13 @@ def define_interior_distance(func, normalized=True):
         return func(abs(partial_solution[cell] - initial_values[cell]) for cell in partial_solution)
       
   return calculate_interior_distance
+
+
+def define_total_distance(normalized=True): 
+  calculate_margin_distance   = define_interior_distance(sum, normalized=normalized)
+  calculate_interior_distance = define_margin_distance(sum, normalized=normalized)
+  
+  def calculate_total_distance(partial_solution, initial_values, constraints, constraint_values):
+    return calculate_margin_distance(partial_solution, initial_values, constraints, constraint_values) + calculate_interior_distance(partial_solution, initial_values, constraints, constraint_values)
+  
+  return calculate_total_distance
