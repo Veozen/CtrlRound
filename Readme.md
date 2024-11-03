@@ -68,8 +68,8 @@ The generated the table as a pandas dataframe. With columns:
 ## Example
 \# Generate a test table with 3 dimensions and 5 categories per dimension.  
 **test = generate_random_table(3, 5, scale=2)**  
-\# Here we use the total distance (sum on the margins and interior cells), we force the rounding of values that are 10% or less away from their bounds and we reduce the size of the heap used.  
-**rounded = ctrl_round(test, by=[0,1,2], var="value", rounding_base=1, distance_total=True, fix_rounding_dist=0.1, max_heap_size=100)  
+\# Here we use the total distance (sum on the margins and interior cells) and we force the rounding of values that are 10% or less away from their bounds.  
+**rounded = ctrl_round(test, by=[0,1,2], var="value", rounding_base=1, distance_total=True, fix_rounding_dist=0.1)  
 print(rounded)**  
 
 \# Here we control the rounding on some margin but not all. The grand total is included and denoted by the empty list  
