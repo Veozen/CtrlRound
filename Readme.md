@@ -17,7 +17,7 @@ The distance functions can be used in various combinations depending on input pa
 - sum on the margins + sum on the interior cells (distance_total=true)
 - max on the margins, sum on the margins + sum on the interior cells  (distance_max=true and distance_total=true)
 
-When a solution is returned, the first three distance functions are evaluated and written in the output regardless of the combination of distance functions used in the search. Note that using the maximum on the margins distance function in the cearch seems to increase run-time.
+When a solution is returned, the first three distance functions are evaluated and written in the output regardless of the combination of distance functions used in the search. Note that using the maximum on the margins distance function in the search seems to increase run-time.
 
 ## Usage 
 
