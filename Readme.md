@@ -73,7 +73,7 @@ The generated the table as a pandas dataframe. With columns:
 print(rounded)**  
 
 \# Here we control the rounding on some margin but not all. The grand total is included and denoted by the empty list  
-**rounded = ctrl_round(test, by=[0,1,2], margins= [[0],[1,2],[3],[] ], var="value")  
+**rounded = ctrl_round(test, by=[0,1,2], margins= [[0],[1,2],[] ], var="value")  
 print(rounded)**  
 
 ## License  
