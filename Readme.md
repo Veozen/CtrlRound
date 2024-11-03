@@ -21,7 +21,7 @@ When a solution is returned, the first three distance functions are evaluated an
 
 ## Usage 
 
-**ctrl_round(df_in, by, var, margins, rounding_base, distance_max, fix_rounding_dist, max_heap_size):**  
+**ctrl_round(df_in, by, var, margins, rounding_base, distance_max, distance_total, fix_rounding_dist, max_heap_size):**  
 Aggregates a dataframe and perform controlled rounding of it's entries.  
 
 **input:**  
@@ -34,7 +34,6 @@ Aggregates a dataframe and perform controlled rounding of it's entries.
 - **rounding_base**     : the rounding base. Has to be greater than 0. Default is 1.
 - **fix_rounding_dist** : if an entry is close to a rounded value by p% of the rounding base, round that entry to its closest rounded value and remove the other rounded value from consideration for that entry. This reduces the search space and run time at the cost of the quality of the solution. Default is 0 which means that cells that are already exactly rounded wont change.
 - **max_heap_size**     : the maximum size of the heap. Has to be greater than 2. Default is 1000. A smaller heap will lead to faster run-time at the cost of the quality of the solution.
-- **reset_heap_fraction** : size of the heap after purging as a percentage of the maximum size. Default is 0.75
 
 **output:**  
 A dictionary with the following keys:
@@ -67,9 +66,15 @@ The generated the table as a pandas dataframe. With columns:
 
 
 ## Example
-test = generate_random_table(3, 5, scale=2)  
+\# Generate a test table with 3 dimensions and 5 categories per dimension.
+test = generate_random_table(3, 5, scale=2)   
+\# Here we use the total distance (sum on the margins and interior cells), we force the rounding of values that are 10% or less away from their bounds and we reduce the size of the heap used.  
 rounded = ctrl_round(test, by=[0,1,2], var="value", rounding_base=1, distance_total=True, fix_rounding_dist=0.1, max_heap_size=100)  
-print(rounded)
+print(rounded)  
+
+\# Here we control the rounding on some margin but not all. The grand total is included and denoted by the empty list  
+rounded = ctrl_round(test, by=[0,1,2], margins= [[0],[1,2],[3],[] ], var="value")  
+print(rounded)  
 
 ## License  
 This project is licensed under the MIT License -
