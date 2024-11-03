@@ -2,12 +2,23 @@
 Controlled rounding is a technique used in data publishing to ensure that data released for public use meets specific confidentiality requirements. 
 The process adjusts the data values by rounding them to a predetermined base in a such a way that the margins of the resulting table remain closer to their original values than they would should the table's entries have been simply rounded to their nearest base.  
 
-Here the solution to this problem is found by applying a best-first-search method where the decision is to round up or down each non-margin entry. Three distance functions are used to sort partial solutions. 
+Here the solution to this problem is found by applying a best-first-search method where the decision is to round up or down each non-margin entry. Four distance functions can used to sort partial solutions. 
 - The max absolute difference between a margin's value and it's original value.  
-- The average absolute difference between a margin's value and it's original value. The average is taken over the rounded cells so far.  
-- The average absolute difference between a table cell's rounded value and it's original value. The average is taken over the rounded cells so far.  
+- The sum of absolute difference between a margin's value and it's original value. 
+- The sum of absolute difference between a table cell's rounded value and it's original value.  
+- The sum of absolute difference between a both margin's value as well as table cell's rounded value and their original value.
+The sum of absolute differences are divided by the number of cells rounded so far providing an average cost of the decision made so far. This distinction makes a difference when comparing partial solutions of differing lengths
+Ties on the first function are resolved by looking subsequent ones. The first complete solution found is returned. 
 
-Ties on the first function are resolved by looking at the second and then third one. The first complete solution found is returned.  
+The distance functions can be used in various combinations depending on input parameters:
+- sum on the margins, sum on the interior cells (Default)
+- max on the margins, sum on the margins, sum on the interior cells (distance_max=true)
+- sum on the margins + sum on the interior cells (distance_total=true)
+- max on the margins, sum on the margins + sum on the interior cells  (distance_max=true and distance_total=true)
+
+When a solution is returned, the first three distance functions are evaluated and written in the output regardless of the combination of distance functions used in the search.
+
+Note that using the maximum on the margins distance function seems to increase run-time.
 
 ## Usage 
 
@@ -19,10 +30,12 @@ Aggregates a dataframe and perform controlled rounding of it's entries.
 - **by**                : list of column names on which to aggregate the input DataFrame
 - **margins**           : list of lists of column names indicating which grouping to aggregate. Can be empty, in which case all grouping and subgrouping are aggregated. Controlling the rounding on a subset of margins will improve the run-time but will leave the other margins free to potentially deviate far from their original values.
 - **var**               : column to be aggregated
-- **distance_max**      : whether or not to include the maximum distance in the list of distances used to sort partial solutions. Not including it reduces the run-time. Default is False.
+- **distance_max**      : whether or not to include the maximum distance in the list of distances used to sort partial solutions. Not including it results in fewer partial solutions expanded and reduces the run-time. Default is False.
+- **distance_total**    : whether or not to add the distance on the margin with the distance on the interior cells as a sorting criterion. If True sorting will be done according to this sum instead of the margin sum then interior sum. Default is False.
 - **rounding_base**     : the rounding base. Has to be greater than 0. Default is 1.
 - **fix_rounding_dist** : if an entry is close to a rounded value by p% of the rounding base, round that entry to its closest rounded value and remove the other rounded value from consideration for that entry. This reduces the search space and run time at the cost of the quality of the solution. Default is 0 which means that cells that are already exactly rounded wont change.
 - **max_heap_size**     : the maximum size of the heap. Has to be greater than 2. Default is 1000. A smaller heap will lead to faster run-time at the cost of the quality of the solution.
+- **reset_heap_fraction** : size of the heap after purging as a percentage of the maximum size. Default is 0.75
 
 **output:**  
 A dictionary with the following keys:
@@ -55,10 +68,13 @@ The generated the table as a pandas dataframe. With columns:
 
 
 ## Example
-
 test = generate_random_table(3, 5, scale=2)  
-ctrl_round(test, by=[0,1,2], var="value", rounding_base=1, distance_max=False, fix_rounding_dist=0.1, max_heap_size=100)  
+rounded = ctrl_round(test, by=[0,1,2], var="value", rounding_base=1, distance_total=True, fix_rounding_dist=0.1, max_heap_size=100)  
+print(rounded)
 
-## License
+## License  
 This project is licensed under the MIT License -
 see the [LICENSE](LICENSE) file for details.
+
+## Changelog   
+For detailed information on changes between versions, see the [CHANGELOG.md](CHANGELOG.md).
