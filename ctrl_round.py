@@ -72,7 +72,7 @@ def timer(func):
     return wrapper_timer
 
 @timer
-def ctrl_round(df_in, by, var, margins=None, distance_max=False, rounding_base=1, fix_rounding_dist= 0, max_heap_size= 1000):
+def ctrl_round(df_in, by, var, margins=None, distance_max=False, distance_total=False, rounding_base=1, fix_rounding_dist= 0, max_heap_size= 1000, reset_heap_fraction=0.75):
   """
   Aggregate a dataframe and perform controlled rounding of it's entries.
   input:
@@ -81,11 +81,13 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, rounding_base=1
     margins           : list of list of column name indicating which grouping to aggregate. Can be empty in which case all grouping and subgrouping are aggregated. 
     Controlling the rounding on a subset of margins will improve the run-time but will leave the other margins free to potentialy deviate far from their original values.
     var               : column to be aggregated
-    rounding_base     : the rounding base. Has to be greater than 0. Default is 1.
-    distance_max      : whether or not to include the maximum distance in the list of distances used to sort partial solutions. Not including it reduces the run-time. Default is False.
+    rounding_base     : the rounding base. Has to be greater than 0.
+    distance_max      : whether or not to include the maximum distance in the list of distances used to sort partial solutions. Not including it results in fewer partial solutions expanded and reduces the run-time.
+    distance_total    : whether or not to add the distance on the margin with the distance on the interior cells as a sorting criterion. If True sorting will be done according to this sum instead of the margin sum then interior sum.
     fix_rounding_dist : if an entry is close to a rounded value by p% of the rounding base, round that entry to it's closest rounded value and remove the other rounded value from consideration for that entry. 
     This reduces the search space and run-time at the cost of the quality of the solution.
     max_heap_size     : the maximum size the heap. Has to be greater than 2. Default is 1000. 
+    reset_heap_fraction: size of the heap after purging as a percentage of the maximum size. Default is 0.75
     A smaller heap will lead to faster run-time at the cost of the quality of the solution.
     
   output:
@@ -106,6 +108,28 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, rounding_base=1
   """
   
   # check input parameters
+  if type(rounding_base) not in [int,float]:
+    raise TypeError("rounding_base has to be integer or float")
+    
+  if type(max_heap_size) not in [int]:
+    raise TypeError("max_heap_size has to be integer")
+  
+  if type(fix_rounding_dist) not in [int,float]:
+    raise TypeError("fix_rounding_dist has to be integer or float")
+    
+  if type(reset_heap_fraction) not in [int,float]:
+    raise TypeError("reset_heap_fraction has to be integer or float")
+    
+  if df_in.dtypes[var] not in [int,float] :
+    raise TypeError(f"column '{var}' is must be of type int or float")
+    
+  if type(distance_max) is not bool:
+    raise TypeError("distance_max has to be True or False")
+    
+  if type(distance_total) is not bool:
+    raise TypeError("distance_total has to be True or False")
+    
+    
   if rounding_base <= 0:
     raise ValueError("rounding_base has to be greater than 0")
     
@@ -118,15 +142,19 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, rounding_base=1
   if fix_rounding_dist >= 0.5:
     raise ValueError("fix_rounding_dist has to be less than 0.5")
   
+  if reset_heap_fraction >= 1:
+    raise ValueError("reset_heap_fraction has to be less than 1")
+    
+  if reset_heap_fraction < 0:
+    raise ValueError("reset_heap_fraction has to be greater than 0")
+    
   if var not in df_in.columns :
     raise KeyError(f"column '{var}' is not in input dataframe")
     
-  if df_in.dtypes[var] not in [int,float] :
-    raise TypeError(f"column '{var}' is must be of type int or float")
-  
   for col in by:
     if col not in df_in.columns :
       raise KeyError(f"column '{col}' is not in input dataframe")
+    
   
   n_cells       = 0
   n_margins     = 0
@@ -192,12 +220,17 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, rounding_base=1
   calculate_margin_max_distance   = define_margin_distance(max, normalized=False)
   calculate_margin_sum_distance   = define_margin_distance(sum)
   calculate_interior_sum_distance = define_interior_distance(sum)
-  if distance_max: 
-    distanceFuncs                   = [calculate_margin_max_distance, calculate_margin_sum_distance, calculate_interior_sum_distance]
+  calculate_total_distance        = define_total_distance()
+  if distance_total: 
+    distanceFuncs                   = [calculate_total_distance]
   else:
     distanceFuncs                   = [calculate_margin_sum_distance, calculate_interior_sum_distance]
+  if distance_max: 
+    distanceFuncs                   = [calculate_margin_max_distance] + distanceFuncs
+  else:
+    distanceFuncs                   = distanceFuncs
   # obtain the best rounding
-  result, n_iterations, n_heap_purges, n_sol_purged = best_first_search(possible_cell_values, initial_values, constraints, constraint_values, distanceFuncs, n_solutions = 1, max_heap_size= max_heap_size )
+  result, n_iterations, n_heap_purges, n_sol_purged = best_first_search(possible_cell_values, initial_values, constraints, constraint_values, distanceFuncs, n_solutions = 1, max_heap_size= max_heap_size, reset_heap_fraction= reset_heap_fraction )
   solution    = result[0][-1]
   objectives  = result[0][:-1]
   # assign the rounded values into a dataframe ready for output
@@ -213,9 +246,10 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, rounding_base=1
   df_margins  = df_margins.drop(cons_id_name,axis=1)
   
   #if the maximum distance was not used to sort partial solutions, provide that distance in the report anyway
-  if not distance_max: 
-    max_distance = calculate_margin_max_distance(solution, initial_values, constraints, constraint_values)
-    objectives = (max_distance,*objectives)
+  max_distance      = calculate_margin_max_distance(solution, initial_values, constraints, constraint_values)
+  sum_distance      = calculate_margin_sum_distance(solution, initial_values, constraints, constraint_values)  
+  interior_distance = calculate_interior_sum_distance(solution, initial_values, constraints, constraint_values) 
+  objectives = (max_distance,sum_distance,interior_distance)
     
   # report information from the optimization process
   opt_report                  = {}
@@ -234,4 +268,5 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, rounding_base=1
             "n_fixed_cells"   : n_fixed_cells}
             
   return output
+
 
