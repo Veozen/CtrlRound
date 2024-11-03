@@ -87,8 +87,8 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, distance_total=
     fix_rounding_dist : if an entry is close to a rounded value by p% of the rounding base, round that entry to it's closest rounded value and remove the other rounded value from consideration for that entry. 
     This reduces the search space and run-time at the cost of the quality of the solution.
     max_heap_size     : the maximum size the heap. Has to be greater than 2. Default is 1000. 
-    reset_heap_fraction: size of the heap after purging as a percentage of the maximum size. Default is 0.75
     A smaller heap will lead to faster run-time at the cost of the quality of the solution.
+    reset_heap_fraction: size of the heap after purging as a percentage of the maximum size. Default is 0.75
     
   output:
     A dictionary with following keys:
