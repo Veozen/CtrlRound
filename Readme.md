@@ -7,8 +7,8 @@ Here the solution to this problem is found by applying a best-first-search metho
 - The sum of absolute difference between a margin's value and it's original value. 
 - The sum of absolute difference between a table cell's rounded value and it's original value.  
 - The sum of absolute difference between a both margin's value as well as table cell's rounded value and their original value.
-- 
-The sum of absolute differences are divided by the number of cells rounded so far providing an average cost of the decision made so far. This distinction makes a difference when comparing partial solutions of differing lengths.  
+
+The sum of absolute differences are divided by the number of cells rounded so far providing an average cost of the decision made so far. This distinction makes a difference when comparing partial solutions of different lengths.  
 Ties on the first function are resolved by looking subsequent ones. The first complete solution found is returned. 
 
 The distance functions can be used in various combinations depending on input parameters:
