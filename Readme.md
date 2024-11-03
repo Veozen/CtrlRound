@@ -7,7 +7,8 @@ Here the solution to this problem is found by applying a best-first-search metho
 - The sum of absolute difference between a margin's value and it's original value. 
 - The sum of absolute difference between a table cell's rounded value and it's original value.  
 - The sum of absolute difference between a both margin's value as well as table cell's rounded value and their original value.
-The sum of absolute differences are divided by the number of cells rounded so far providing an average cost of the decision made so far. This distinction makes a difference when comparing partial solutions of differing lengths
+- 
+The sum of absolute differences are divided by the number of cells rounded so far providing an average cost of the decision made so far. This distinction makes a difference when comparing partial solutions of differing lengths.  
 Ties on the first function are resolved by looking subsequent ones. The first complete solution found is returned. 
 
 The distance functions can be used in various combinations depending on input parameters:
@@ -16,9 +17,7 @@ The distance functions can be used in various combinations depending on input pa
 - sum on the margins + sum on the interior cells (distance_total=true)
 - max on the margins, sum on the margins + sum on the interior cells  (distance_max=true and distance_total=true)
 
-When a solution is returned, the first three distance functions are evaluated and written in the output regardless of the combination of distance functions used in the search.
-
-Note that using the maximum on the margins distance function seems to increase run-time.
+When a solution is returned, the first three distance functions are evaluated and written in the output regardless of the combination of distance functions used in the search. Note that using the maximum on the margins distance function in the cearch seems to increase run-time.
 
 ## Usage 
 
