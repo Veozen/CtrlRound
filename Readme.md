@@ -17,7 +17,9 @@ The distance functions can be used in various combinations depending on input pa
 - sum on the margins + sum on the interior cells (distance_total=true)
 - max on the margins, sum on the margins + sum on the interior cells  (distance_max=true and distance_total=true)
 
-When a solution is returned, the first three distance functions are evaluated and written in the output regardless of the combination of distance functions used in the search. Note that using the maximum on the margins distance function in the search seems to increase run-time.
+When a solution is returned, the first three distance functions are evaluated and written in the output regardless of the combination of distance functions used in the search. Note that using the maximum on the margins distance function in the search seems to increase execution time.
+
+If the input table contains multipule rows for the same "by" columns values, the table is grouped by the "by" columns and the "var" column is summed over.
 
 ## Usage 
 
@@ -25,10 +27,10 @@ When a solution is returned, the first three distance functions are evaluated an
 Aggregates a dataframe and perform controlled rounding of it's entries.  
 
 **input:**  
-- **df_in**             : pandas DataFrame
+- **df_in**             : pandas DataFrame of the interior cells of the table to be rounded
 - **by**                : list of column names on which to aggregate the input DataFrame
 - **margins**           : list of lists of column names indicating which grouping to aggregate. Can be empty, in which case all grouping and subgrouping are aggregated. Controlling the rounding on a subset of margins will improve the run-time but will leave the other margins free to potentially deviate far from their original values.
-- **var**               : column to be aggregated
+- **var**               : column to be rounded
 - **distance_max**      : whether or not to include the maximum distance in the list of distances used to sort partial solutions. Not including it reduces the run-time. Default is False.
 - **distance_total**    : whether or not to add the distance on the margin with the distance on the interior cells as a sorting criterion. If True sorting will be done according to this sum instead of the margin sum then interior sum. Default is False.
 - **rounding_base**     : the rounding base. Has to be greater than 0. Default is 1.
