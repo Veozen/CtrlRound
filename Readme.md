@@ -81,3 +81,7 @@ print(rounded)**
 ## License  
 This project is licensed under the MIT License -
 see the [LICENSE](LICENSE) file for details.
+
+## Changelog   
+For detailed information on changes between versions, see the [CHANGELOG.md](CHANGELOG.md).
+
