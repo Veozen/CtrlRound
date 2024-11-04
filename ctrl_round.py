@@ -71,8 +71,9 @@ def timer(func):
         return value
     return wrapper_timer
 
+
 @timer
-def ctrl_round(df_in, by, var, margins=None, distance_max=False, distance_total=False, rounding_base=1, fix_rounding_dist= 0, max_heap_size= 1000, reset_heap_fraction=0.75):
+def ctrl_round(df_in, by, var, margins=None, distance_max=False, distance_total=False, rounding_base=1, fix_rounding_dist= 0, max_heap_size= 1000):
   """
   Aggregate a dataframe and perform controlled rounding of it's entries.
   input:
@@ -88,7 +89,6 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, distance_total=
     This reduces the search space and run-time at the cost of the quality of the solution.
     max_heap_size     : the maximum size the heap. Has to be greater than 2. Default is 1000. 
     A smaller heap will lead to faster run-time at the cost of the quality of the solution.
-    reset_heap_fraction: size of the heap after purging as a percentage of the maximum size. Default is 0.75
     
   output:
     A dictionary with following keys:
@@ -117,9 +117,6 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, distance_total=
   if type(fix_rounding_dist) not in [int,float]:
     raise TypeError("fix_rounding_dist has to be integer or float")
     
-  if type(reset_heap_fraction) not in [int,float]:
-    raise TypeError("reset_heap_fraction has to be integer or float")
-    
   if df_in.dtypes[var] not in [int,float] :
     raise TypeError(f"column '{var}' is must be of type int or float")
     
@@ -141,12 +138,6 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, distance_total=
     
   if fix_rounding_dist >= 0.5:
     raise ValueError("fix_rounding_dist has to be less than 0.5")
-  
-  if reset_heap_fraction >= 1:
-    raise ValueError("reset_heap_fraction has to be less than 1")
-    
-  if reset_heap_fraction < 0:
-    raise ValueError("reset_heap_fraction has to be greater than 0")
     
   if var not in df_in.columns :
     raise KeyError(f"column '{var}' is not in input dataframe")
@@ -155,15 +146,17 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, distance_total=
     if col not in df_in.columns :
       raise KeyError(f"column '{col}' is not in input dataframe")
     
-  
+  # initialize counters
   n_cells       = 0
   n_margins     = 0
   n_fixed_cells = 0
   
   # aggregate "var" by "by" columns in case there are duplicates in the input to make sure we have a table with signle entries per cell
   by_values               = df_in.groupby(by).sum(var).reset_index()
+  
   # get a unique name not already present in the dataframe to store cell identifier
   cell_id_name            = get_unique_col_name(by_values,"cellId")
+  
   # create a unique identifer for each cell of the table
   by_values[cell_id_name] = range(len(by_values))
   cellId_lst              = list(by_values[cell_id_name])
@@ -185,7 +178,6 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, distance_total=
   possible_values[lower]    = possible_values[var] - lower_residual
   possible_values[upper]    = possible_values[lower] + rounding_base
   possible_values[residual] = lower_residual
-  
   
   # check if the original value is not already rounded, in which case the upper value should be the same.  
   possible_cell_values      = {cellId:[] for cellId in cellId_lst}
@@ -221,18 +213,22 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, distance_total=
   calculate_margin_sum_distance   = define_margin_distance(sum)
   calculate_interior_sum_distance = define_interior_distance(sum)
   calculate_total_distance        = define_total_distance()
+  
   if distance_total: 
     distanceFuncs                   = [calculate_total_distance]
   else:
     distanceFuncs                   = [calculate_margin_sum_distance, calculate_interior_sum_distance]
+    
   if distance_max: 
     distanceFuncs                   = [calculate_margin_max_distance] + distanceFuncs
   else:
     distanceFuncs                   = distanceFuncs
+    
   # obtain the best rounding
-  result, n_iterations, n_heap_purges, n_sol_purged = best_first_search(possible_cell_values, initial_values, constraints, constraint_values, distanceFuncs, n_solutions = 1, max_heap_size= max_heap_size, reset_heap_fraction= reset_heap_fraction )
+  result, n_iterations, n_heap_purges, n_sol_purged = best_first_search(possible_cell_values, initial_values, constraints, constraint_values, distanceFuncs, n_solutions = 1, max_heap_size= max_heap_size )
   solution    = result[0][-1]
   objectives  = result[0][:-1]
+  
   # assign the rounded values into a dataframe ready for output
   df_out      = by_values.copy()
   df_out[var] = by_values[cell_id_name].map(solution)
@@ -268,5 +264,3 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, distance_total=
             "n_fixed_cells"   : n_fixed_cells}
             
   return output
-
-
