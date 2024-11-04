@@ -1,6 +1,6 @@
 # Changelog 
 
-## [0.2.0] - 2024-11-02 
+## [0.2.0] - 2024-11-03 
 ### Added - **distance_max** input parameter. Controls whether or not to include the maximum distance in the list of distances used to sort partial solutions. Not including it results in fewer partial solutions expanded and reduces the run-time.
 
 ### Added - **distance_total** input parameter. Controls whether or not to add the distance on the margin with the distance on the interior cells as a sorting criterion. If True sorting will be done according to this sum instead of the margin sum then interior sum.
