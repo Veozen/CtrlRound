@@ -194,3 +194,52 @@ def best_first_search_fast(possible_cell_values, initial_values, constraints, ce
           n_heap_purges += 1
           
     return Solutions, counter, n_heap_purges, n_sol_purged
+
+
+def sequential_round(possible_cell_values, initial_values, cell_id_constraints, constraints, constraint_values, distance_funcs ):
+  # a unique counter for each partial solution pushed in the heap
+  nCell             = 0
+  # number of distance functions passed
+  nfuncs            = len(distance_funcs)
+  # list of all decision variables
+  cell_id_list      = list(initial_values.keys())
+  #the first solution  is the one where no decision has been made yet
+  current_solution  = initial_values.copy()
+  current_constraint_values = constraint_values.copy()
+  
+  
+  initial_constraint_values = constraint_values.copy()
+  f                         = distance_funcs[0]
+   
+  for cell_id in cell_id_list:
+    current_distances = []
+    nCell +=1
+    
+    # Generate neighbors
+    for value in possible_cell_values[cell_id]:
+        current_constraint_values         = modify_margins(cell_id, current_solution[cell_id], value, cell_id_constraints[cell_id], current_constraint_values)
+        new_param_list_margin     = [nCell, initial_constraint_values, current_constraint_values]
+        #new_distances             = [f(*new_param_list) for f in distance_funcs]
+        
+        current_solution[cell_id] = value
+        new_param_list_interior   = [nCell, initial_values, current_solution]
+        new_distances             = [f(*new_param_list_margin) , f(*new_param_list_interior)] # for f in distance_funcs]
+        current_distances.append((new_distances, value, current_constraint_values))
+    
+    #get the best choice
+    if current_distances[0][0] <= current_distances[1][0]:
+      best_value        = current_distances[0][1]
+      current_constraint_values = current_distances[0][2]
+      #update solution
+      current_solution[cell_id] = best_value
+    else:
+      current_constraint_values = current_distances[1][2]
+      
+    #update margins
+    #constraint_values = modify_margins(cell_id, current_solution[cell_id], best_value, cell_id_constraints[cell_id], constraint_values)
+    
+    #update progress bar
+    update_progress(nCell/ len(cell_id_list)  )
+    
+  # output the N first Solutions found
+  return current_solution , current_distances[0], current_constraint_values
