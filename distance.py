@@ -43,3 +43,58 @@ def define_total_distance(normalized=True):
     return calculate_margin_distance(partial_solution, initial_values, constraints, constraint_values) + calculate_interior_distance(partial_solution, initial_values, constraints, constraint_values)
   
   return calculate_total_distance
+
+
+#-----------------------
+
+def modify_margins(cell_id, previous_value, new_value, constraints_list, constraint_values):
+  new_constraint_values = constraint_values.copy()
+  for cons in constraints_list:
+    new_constraint_values[cons] = new_constraint_values[cons]-previous_value + new_value
+  return new_constraint_values
+
+def define_distance(func, normalized=True):
+  def calculate_distance(nCell, initial_values, new_values):    
+    discrepancies = [0]
+    nCell= max(nCell,1)
+    for id in new_values:
+      discrepancies.append(abs(initial_values[id] - new_values[id])) 
+    result = func(discrepancies)
+    if normalized:
+      result = result/nCell
+    return result
+  return calculate_distance
+
+def define_inner_distance_(func, normalized=True):
+  def calculate_distance(nCell, initial_values, new_values, initial_constraint_values, new_constraint_values):    
+    discrepancies = [0]
+    nCell= max(nCell,1)
+    for id in new_values:
+      discrepancies.append(abs(initial_values[id] - new_values[id])) 
+    result = func(discrepancies)
+    if normalized:
+      result = result/nCell
+    return result
+  return calculate_distance
+
+def define_contraints_distance_(func, normalized=True):
+  def calculate_distance(nCell, initial_values, new_values, initial_constraint_values, new_constraint_values):    
+    discrepancies = [0]
+    nCell= max(nCell,1)
+    for id in new_constraint_values:
+      discrepancies.append(abs(initial_constraint_values[id] - new_constraint_values[id])) 
+    result = func(discrepancies)
+    if normalized:
+      result = result/nCell
+    return result
+  return calculate_distance  
+
+def define_total_distance_(normalized=True): 
+  calculate_margin_distance   = define_contraints_distance_(sum, normalized=normalized)
+  calculate_interior_distance = define_inner_distance_(sum, normalized=normalized)
+  
+  def calculate_total_distance(partial_solution, initial_values, constraints, constraint_values):
+    return calculate_margin_distance(partial_solution, initial_values, constraints, constraint_values) + calculate_interior_distance(partial_solution, initial_values, constraints, constraint_values)
+  
+  return calculate_total_distance
+  
