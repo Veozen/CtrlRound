@@ -19,30 +19,6 @@ def define_margin_distance(func, normalized=True):
         return func(marginDiscrepancies)
   return calculate_margin_distance
 
-def define_margin_distance_(func, normalized=True):  
-  #define the distance function used through the aggregation function used on the margins
-  def calculate_margin_distance(partial_solution, initial_values, cell_id_constraints, constraint_values):
-      nCell = len(partial_solution) 
-      margin_discrepancies    = []
-      all_cons_to_be_adjusted = set([cons_id for cell_id in partial_solution for cons_id in cell_id_constraints[cell_id]])
-      margin_values           = {cons_id: constraint_values[cons_id] for cons_id in all_cons_to_be_adjusted }
-      
-      #adjust the margins
-      for cell_id in partial_solution:
-        for cons_id in cell_id_constraints[cell_id]:
-          margin_values[cons_id] +=  partial_solution[cell_id] - initial_values[cell_id]
-          
-      for cons_id in margin_values:
-        initial_value   = constraint_values[cons_id]
-        current_value   = margin_values[cons_id]
-        margin_discrepancies.append(abs(current_value - initial_value)) 
-        
-      if nCell> 1 and normalized:
-        return func(margin_discrepancies)/nCell
-      else:
-        return func(margin_discrepancies) 
-
-  return calculate_margin_distance
   
 def define_interior_distance(func, normalized=True): 
   #define a distance function on the interior cells
