@@ -35,7 +35,7 @@ Aggregates a dataframe and perform controlled rounding of it's entries.
 - **distance_total**    : whether or not to add the distance on the margin with the distance on the interior cells as a sorting criterion. If True sorting will be done according to this sum instead of the margin sum then interior sum. Default is False.
 - **rounding_base**     : the rounding base. Has to be greater than 0. Default is 1.
 - **fix_rounding_dist** : if an entry is close to a rounded value by p% of the rounding base, round that entry to its closest rounded value and remove the other rounded value from consideration for that entry. This reduces the search space and execution time at the cost of the quality of the solution. Default is 0 which means that cells that are already exactly rounded won't change.
-- **max_heap_size**     : the maximum size of the heap. Has to be greater than 2. Default is 1000. A smaller heap will lead to faster execution at the cost of the quality of the solution.
+- **max_heap_size**     : the maximum size of the heap. Has to be greater than 2. Default is 100. A smaller heap will lead to faster execution at the cost of the quality of the solution.
 
 **output:**  
 A dictionary with the following keys:
