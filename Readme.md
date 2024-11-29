@@ -17,7 +17,7 @@ The distance functions can be used in various combinations depending on input pa
 - sum on the margins + sum on the interior cells (distance_total=true)
 - max on the margins, sum on the margins + sum on the interior cells  (distance_max=true and distance_total=true)
 
-When a solution is returned, the first three distance functions are evaluated and written in the output regardless of the combination of distance functions used in the search. Note that using the maximum on the margins distance function in the search seems to increase execution time.
+When a solution is returned, the first three distance functions are evaluated and written in the output along with the maximum discrepancy on the interior cells regardless of the combination of distance functions used in the search. Note that using the maximum on the margins distance function in the search seems to increase execution time.
 
 If the input table contains multipule rows for the same "by" columns values, the table is grouped by the "by" columns and the "var" column is summed over.
 
@@ -43,7 +43,7 @@ A dictionary with the following keys:
 - **input_margins**   : the margins of the input table
 - **rounded_table**   : the rounded solution of input data with columns listed in the "by" and "var" input parameters.
 - **rounded_margins** : the margins of the rounded table
-- **objectives**      : the objective function's value for the solution
+- **distance**        : the distance function's value for the solution
 - **opt_report**      : a dictionary containing information about the optimisation process with the following keys:
   - **n_iterations**  : the number of partial solutions expanded
   - **n_heap_purges** : the number of times the heap was purged, keeping the best solutions so far
