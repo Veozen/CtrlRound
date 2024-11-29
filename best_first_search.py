@@ -22,11 +22,21 @@ def update_progress(progress ):
 
 
 def modify_margins(cell_id, previous_value, new_value, constraints_list, constraint_values ):
+  #modifies the margins corresponding to the new value assigned to the current cell_id
   new_constraint_values  = constraint_values.copy()
   for cons in constraints_list:
     new_constraint_values[cons] = new_constraint_values[cons]-previous_value + new_value
   return new_constraint_values
 
+def generate_distances(param_list, distance_funcs): 
+  #applies objective functions on the parameter list and unpack the results
+  for f in distance_funcs: 
+    result = f(*param_list) 
+    if isinstance(result, list): 
+      for item in result: 
+        yield item 
+    else: 
+      yield result 
 
 def best_first_search(possible_cell_values, initial_values, constraints, cell_id_constraints, constraint_values, distance_funcs, n_solutions=0, max_heap_size=1000, reset_heap_fraction=0.75):
     """
@@ -59,10 +69,12 @@ def best_first_search(possible_cell_values, initial_values, constraints, cell_id
     # Priority queue for Best First Search
     pq              = []
     
+    
     #the first solution  is the one where no decision has been made yet
     initial_partial_solution  = {}
-    param_list                = [len(initial_partial_solution), initial_values, initial_partial_solution, constraint_values, constraint_values]
-    initial_distances         = [f(*param_list) for f in distance_funcs]
+    initial_inner_dicrepancy  = 0
+    param_list                = [len(initial_partial_solution), None, initial_inner_dicrepancy,  initial_values, initial_partial_solution, constraint_values, constraint_values]
+    initial_distances         = list(generate_distances(param_list,distance_funcs))
     initial_state             = (*initial_distances, counter, initial_partial_solution, constraint_values)
     longest_partial_solution  = 0
     
@@ -74,6 +86,9 @@ def best_first_search(possible_cell_values, initial_values, constraints, cell_id
         current_partial_solution  = current_best_node[-2]
         current_constraint_values = current_best_node[-1]
         current_distances         = current_best_node[:-2]
+        
+        current_inner_dicrepancy  = current_distances[-2]
+        current_margin_dicrepancy = current_distances[-3]
         
         longest_partial_solution  = max(longest_partial_solution, len(current_partial_solution))
         
@@ -99,9 +114,10 @@ def best_first_search(possible_cell_values, initial_values, constraints, cell_id
             new_constraint_values         = modify_margins(cell_id, current_partial_solution[cell_id], value, cell_id_constraints[cell_id], current_constraint_values)
             new_partial_solution[cell_id] = value
             
-            new_param_list                = [len(new_partial_solution), initial_values, new_partial_solution, constraint_values, new_constraint_values]
-            new_distances                 = [f(*new_param_list) for f in distance_funcs]
-            
+            new_param_list                = [len(new_partial_solution), cell_id, current_inner_dicrepancy, initial_values, new_partial_solution, constraint_values, new_constraint_values]
+            #new_distances                 = [f(*new_param_list) for f in distance_funcs]
+            new_distances                 = list(generate_distances(new_param_list,distance_funcs))
+          
             # a unique counter is stored in the state so that the heap will never attempt at comparing partial soutions distionaries as this would result in an error
             # if both distances are the same as another element in the heap, at least the counter will be different and used to order the elements
             counter                       += 1
