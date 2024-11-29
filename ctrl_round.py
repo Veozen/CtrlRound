@@ -2,8 +2,9 @@ import pandas as pd
 from itertools import combinations
 import functools
 from time import perf_counter
-from best_first_search import best_first_search
-from distance import define_margin_distance, define_interior_distance, define_total_distance
+from .best_first_search import best_first_search
+from .distance import define_margin_distance, define_interior_distance, define_total_distance
+from .distance import define_accumulate_margin_distance, define_accumulate_interior_distance, define_accumulate_total_distance
 
 def agg_by(df:pd.DataFrame, by, var, id):
     #aggregate a grouped dataframe
@@ -88,7 +89,7 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, distance_total=
     input_margins   : the margins of the input table
     rounded_table   : the rounded solution of input data with columns listed in the "by" and "var" input parameters.
     rounded_margins : the margins of the rounded table
-    objectives      : the objective functions value for the solution
+    distances       : the distance functions value for the solution
     opt_report      : a dictionary containing information about the optimisation process with folowing keys:
       n_iterations  : the number of partial solution expanded
       n_heap_purges : the number of times the heap was purged, keeping the best solutions so far
@@ -161,11 +162,11 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, distance_total=
     initial_values[row[cell_id_name]]  = row[var]
   
   # create a mapping of each cell identifer to each possible rounded value 
-  possible_values = var_values
-  lower_residual  = possible_values[var] % rounding_base
-  lower           = get_unique_col_name(by_values,"lower")
-  upper           = get_unique_col_name(by_values,"upper")
-  residual        = get_unique_col_name(by_values,"residual")
+  possible_values           = var_values
+  lower_residual            = possible_values[var] % rounding_base
+  lower                     = get_unique_col_name(by_values,"lower")
+  upper                     = get_unique_col_name(by_values,"upper")
+  residual                  = get_unique_col_name(by_values,"residual")
   
   possible_values[lower]    = possible_values[var] - lower_residual
   possible_values[upper]    = possible_values[lower] + rounding_base
@@ -203,23 +204,21 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, distance_total=
   # create a mapping of each cell to a list of margins this cell will be aggreagated to
   cell_id_constraints = {cell_id:[cons_id for cons_id in constraints if cell_id in constraints[cons_id]] for cell_id in cell_id_lst}
   
-  # define out distances measures
-  calculate_margin_max_distance   = define_margin_distance(max, normalized=False)
-  calculate_margin_sum_distance   = define_margin_distance(sum)
-  calculate_interior_sum_distance = define_interior_distance(sum)
+  # define distances measures
+  accumulate_margin_max_distance    = define_accumulate_margin_distance(max, normalized=False)
+  accumulate_margin_sum_distance    = define_accumulate_margin_distance(sum)
+  accumulate_interior_sum_distance  = define_accumulate_interior_distance(sum)
   
   if distance_total: 
-    calculate_total_distance      = define_total_distance()
+    accumulate_total_distance       = define_accumulate_total_distance()
+    
+  distance_funcs                    = [accumulate_margin_sum_distance, accumulate_interior_sum_distance]
   
   if distance_total: 
-    distance_funcs                = [calculate_total_distance]
-  else:
-    distance_funcs                = [calculate_margin_sum_distance, calculate_interior_sum_distance]
+    distance_funcs                  = [accumulate_total_distance]
     
   if distance_max: 
-    distance_funcs                = [calculate_margin_max_distance] + distance_funcs
-  else:
-    distance_funcs                = distance_funcs
+    distance_funcs                  = [accumulate_margin_max_distance] + distance_funcs
     
   # obtain the best rounding
   result, n_iterations, n_heap_purges, n_sol_purged = best_first_search(possible_cell_values, initial_values, constraints, cell_id_constraints, constraint_values, distance_funcs, n_solutions = 1, max_heap_size= max_heap_size )
@@ -233,11 +232,17 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, distance_total=
   margins     = aggregate_and_list(df_out, by, var, margins, cell_id_name)
   margins     = margins.drop(cell_id_name,axis=1)
   
-  #if the maximum distance was not used to sort partial solutions, provide that distance in the report anyway
-  max_distance      = calculate_margin_max_distance(len(solution), initial_values, solution, constraint_values, final_constraint_values)
-  sum_distance      = calculate_margin_sum_distance(len(solution), initial_values, solution, constraint_values, final_constraint_values)  
-  interior_distance = calculate_interior_sum_distance(len(solution), initial_values, solution, constraint_values, final_constraint_values) 
-  objectives        = (max_distance, sum_distance, interior_distance)
+  # report the average and maximum distance on interior and margin cells
+  calculate_margin_max_distance    = define_margin_distance(max, normalized=False)
+  calculate_margin_sum_distance    = define_margin_distance(sum, normalized=False)
+  calculate_interior_max_distance  = define_interior_distance(max, normalized=False)
+  calculate_interior_sum_distance  = define_interior_distance(sum)
+  
+  margin_max_distance       = calculate_margin_max_distance(len(solution), initial_values, solution, constraint_values, final_constraint_values)
+  margin_average_distance   = calculate_margin_sum_distance(len(solution), initial_values, solution, constraint_values, final_constraint_values) /len(constraints) 
+  interior_max_distance     = calculate_interior_max_distance(len(solution), initial_values, solution, constraint_values, final_constraint_values) 
+  interior_average_distance = calculate_interior_sum_distance(len(solution), initial_values, solution, constraint_values, final_constraint_values) 
+  distances                 = (margin_max_distance, margin_average_distance, interior_max_distance, interior_average_distance)
    
   #clean up the output
   df_out      = df_out.drop(cell_id_name,axis=1)
@@ -255,11 +260,10 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, distance_total=
             "input_margins"   : df_margins, \
             "rounded_table"   : df_out, \
             "rounded_margins" : margins, \
-            "objectives"      : objectives, \
+            "distances"       : distances, \
             "opt_report"      : opt_report, \
             "n_cells"         : n_cells, \
             "n_margins"       : n_margins, \
             "n_fixed_cells"   : n_fixed_cells}
             
   return output
-
