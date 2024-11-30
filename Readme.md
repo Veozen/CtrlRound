@@ -43,7 +43,7 @@ A dictionary with the following keys:
 - **input_margins**   : the margins of the input table
 - **rounded_table**   : the rounded solution of input data with columns listed in the "by" and "var" input parameters.
 - **rounded_margins** : the margins of the rounded table
-- **distance**        : the distance function's value for the solution
+- **distances**       : the distances function's value for the solution
 - **opt_report**      : a dictionary containing information about the optimisation process with the following keys:
   - **n_iterations**  : the number of partial solutions expanded
   - **n_heap_purges** : the number of times the heap was purged, keeping the best solutions so far
