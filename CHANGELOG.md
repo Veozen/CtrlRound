@@ -1,5 +1,25 @@
 # Changelog 
 
+## [0.4.0] - 2024-12-01 
+Added - maximum discrepancy on the interior cells in now also reported in the output
+
+Added - **__version__** 
+
+Added - **__author__** 
+
+Changed - **objectives** output key is now **distances**
+
+Changed - improved execution time
+
+## [0.3.0] - 2024-11-15 
+Fixed - issue that occured when using **distance_total=True**
+
+Fixed - issue when using **margins** with a column not listed in **by**
+
+Changed - default **max_heap_size** is now 100
+
+Changed - improved execution time
+
 ## [0.2.0] - 2024-11-02 
 Added - **distance_max** input parameter. Controls whether or not to include the maximum distance in the list of distances used to sort partial solutions. Not including it results in fewer partial solutions expanded and reduces the run-time.
 
