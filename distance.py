@@ -4,8 +4,7 @@ def define_interior_distance(func, normalized=True):
   def calculate_distance(nCell, initial_values, new_values, initial_constraint_values, new_constraint_values):    
     discrepancies = [0]
     nCell= max(nCell,1)
-    for id in new_values:
-      discrepancies.append(abs(initial_values[id] - new_values[id])) 
+    discrepancies = [abs(initial_values[id] - new_values[id]) for id in new_values]
     result = func(discrepancies)
     if normalized:
       result = result/nCell
@@ -16,8 +15,7 @@ def define_margin_distance(func, normalized=True):
   def calculate_distance(nCell, initial_values, new_values, initial_constraint_values, new_constraint_values):    
     discrepancies = [0]
     nCell= max(nCell,1)
-    for id in new_constraint_values:
-      discrepancies.append(abs(initial_constraint_values[id] - new_constraint_values[id])) 
+    discrepancies = [abs(initial_constraint_values[id] - new_constraint_values[id]) for id in new_constraint_values]
     result = func(discrepancies)
     if normalized:
       result = result/nCell
@@ -49,14 +47,13 @@ def define_accumulate_margin_distance(func, normalized=True):
   def calculate_distance(nCell, cell_id, inner_discrepancy, initial_values, new_values, initial_constraint_values, new_constraint_values):    
     discrepancies = [0]
     nCell= max(nCell,1)
-    for id in new_constraint_values:
-      discrepancies.append(abs(initial_constraint_values[id] - new_constraint_values[id])) 
+    discrepancies = [abs(initial_constraint_values[id] - new_constraint_values[id]) for id in new_constraint_values]
     result = func(discrepancies)
     if normalized:
       result = result/nCell
     return result
   return calculate_distance  
-
+  
 def define_accumulate_total_distance(normalized=True): 
   calculate_margin_distance    = define_accumulate_margin_distance(sum, normalized=normalized)
   accumulate_interior_distance = define_accumulate_interior_distance(sum, normalized=normalized)
