@@ -1,5 +1,9 @@
 # Changelog 
 
+## [0.5.0] - 2025-01-03 
+
+Changed - improved execution time. Distance functions on the margins now use list comprehensions.
+
 ## [0.4.0] - 2024-12-01 
 Added - maximum discrepancy on the interior cells in now also reported in the output
 
