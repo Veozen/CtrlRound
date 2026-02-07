@@ -33,7 +33,7 @@ def define_margin_distance(func, normalized=True):
         return result
     return calculate_distance
 
-def define_total_distance(normalized=True): 
+def define_total_distance(normalized=True):
     """
     Creates a function to calculate distance from the margins and interior cells
     """
@@ -52,7 +52,7 @@ def define_accumulate_interior_distance(func, normalized=True):
     """
     def calculate_distance(n_cell, cell_id, inner_discrepancy, initial_values, new_values, initial_constraint_values, new_constraint_values):
         if n_cell > 0 :
-            new_discrepancy = (abs(initial_values[cell_id] - new_values[cell_id]))
+            new_discrepancy = abs(initial_values[cell_id] - new_values[cell_id])
             inner_discrepancy = func([inner_discrepancy*(n_cell-1), new_discrepancy] )
         n_cell= max(n_cell,1)
         if normalized:
@@ -73,7 +73,7 @@ def define_accumulate_margin_distance(func, normalized=True):
             result = result/n_cell
         return result
     return calculate_distance
-  
+
 def define_accumulate_total_distance(normalized=True):
     """
     Creates a function to accumulate distance from the margins and interior cells
@@ -88,4 +88,5 @@ def define_accumulate_total_distance(normalized=True):
         return [total_distance, margin_distance, inner_distance]
 
     return calculate_total_distance
+
 
