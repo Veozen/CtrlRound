@@ -100,7 +100,13 @@ def best_first_search(possible_cell_values,
     #the first solution  is the one where no decision has been made yet
     initial_partial_solution  = {}
     initial_inner_dicrepancy  = 0
-    param_list                = [len(initial_partial_solution), None, initial_inner_dicrepancy,  initial_values, initial_partial_solution, constraint_values, constraint_values]
+    param_list                = [len(initial_partial_solution),
+                                 None,
+                                 initial_inner_dicrepancy,
+                                 initial_values,
+                                 initial_partial_solution,
+                                 constraint_values,
+                                 constraint_values]
     initial_distances         = list(generate_distances(param_list,distance_funcs))
     initial_state             = (*initial_distances, counter, initial_partial_solution, constraint_values)
     longest_partial_solution  = 0
@@ -138,10 +144,20 @@ def best_first_search(possible_cell_values,
         for value in possible_cell_values[cell_id]:
             new_partial_solution          = current_partial_solution.copy()
             
-            new_constraint_values         = modify_margins(cell_id, current_partial_solution[cell_id], value, cell_id_constraints[cell_id], current_constraint_values)
+            new_constraint_values         = modify_margins(cell_id,
+                                                           current_partial_solution[cell_id],
+                                                           value,
+                                                           cell_id_constraints[cell_id],
+                                                           current_constraint_values)
             new_partial_solution[cell_id] = value
             
-            new_param_list                = [len(new_partial_solution), cell_id, current_inner_dicrepancy, initial_values, new_partial_solution, constraint_values, new_constraint_values]
+            new_param_list                = [len(new_partial_solution),
+                                             cell_id,
+                                             current_inner_dicrepancy,
+                                             initial_values,
+                                             new_partial_solution,
+                                             constraint_values,
+                                             new_constraint_values]
             #new_distances                 = [f(*new_param_list) for f in distance_funcs]
             new_distances                 = list(generate_distances(new_param_list,distance_funcs))
             
