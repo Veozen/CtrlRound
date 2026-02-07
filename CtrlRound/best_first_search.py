@@ -100,7 +100,7 @@ def best_first_search(possible_cell_values,
 
     # Priority queue for Best First Search
     pq              = []
-             
+
     #the first solution  is the one where no decision has been made yet
     initial_partial_solution  = {}
     initial_inner_dicrepancy  = 0
