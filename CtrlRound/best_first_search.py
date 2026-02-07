@@ -24,7 +24,7 @@ def update_progress(progress ):
     bar = "#" * block + "-" * (barLength - block)
     percent = round(progress * 100, 2)
     text = (
-        f"{'\rProgress '.ljust(10)} : "
+        f"\r{'Progress'.ljust(10)} : "
         f"[{bar}] {percent}% {status}"
     )
     sys.stdout.write(text)
@@ -147,6 +147,7 @@ def best_first_search(possible_cell_values, initial_values, constraints, cell_id
           n_heap_purges += 1
           
     return Solutions, counter, n_heap_purges, n_sol_purged
+
 
 
 
