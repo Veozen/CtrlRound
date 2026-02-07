@@ -16,7 +16,12 @@ def update_progress(progress ):
         progress = 1
         status = "Done...\r\n"
     block : int = int(round(barLength*progress))
-    text  : str = "\rProgress ".ljust(10) + " : " + "[{0}] {1}% {2}".format( "#"*block + "-"*(barLength-block), round(progress*100,2), status)
+    bar = "#" * block + "-" * (barLength - block)
+    percent = round(progress * 100, 2)
+    text = (
+        f"{'\rProgress '.ljust(10)} : "
+        f"[{bar}] {percent}% {status}"
+    )
     sys.stdout.write(text)
     sys.stdout.flush()
 
@@ -133,3 +138,4 @@ def best_first_search(possible_cell_values, initial_values, constraints, cell_id
           n_heap_purges += 1
           
     return Solutions, counter, n_heap_purges, n_sol_purged
+
