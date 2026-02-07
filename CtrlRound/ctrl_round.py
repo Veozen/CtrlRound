@@ -183,7 +183,8 @@ def ctrl_round(df_in,
     n_margins     = 0
     n_fixed_cells = 0
 
-    # aggregate "var" by "by" columns in case there are duplicates in the input to make sure we have a table with signle entries per cell
+    # aggregate "var" by "by" columns in case there are duplicates in the input 
+    # to make sure we have a table with signle entries per cell
     by_values               = df_in.groupby(by)[var].sum().reset_index()
 
     # get a unique name not already present in the dataframe to store cell identifier
@@ -260,7 +261,14 @@ def ctrl_round(df_in,
         distance_funcs                  = [accumulate_margin_max_distance] + distance_funcs
 
     # obtain the best rounding
-    result, n_iterations, n_heap_purges, n_sol_purged = best_first_search(possible_cell_values, initial_values, constraints, cell_id_constraints, constraint_values, distance_funcs, n_solutions = 1, max_heap_size= max_heap_size )
+    result, n_iterations, n_heap_purges, n_sol_purged = best_first_search(possible_cell_values,
+                                                                          initial_values,
+                                                                          constraints,
+                                                                          cell_id_constraints,
+                                                                          constraint_values,
+                                                                          distance_funcs,
+                                                                          n_solutions = 1,
+                                                                          max_heap_size = max_heap_size )
     solution    = result[0][-2]
     objectives  = result[0][:-2]
     final_constraint_values = result[0][-1]
@@ -306,4 +314,5 @@ def ctrl_round(df_in,
               "n_fixed_cells"   : n_fixed_cells}
 
     return output
+
 
