@@ -54,21 +54,18 @@ def define_total_distance(normalized=True):
                                  new_values,
                                  initial_constraint_values,
                                  new_constraint_values):
-        margin_distance     = calculate_margin_distance(n_cell,
-                                                        initial_values,
-                                                        new_values,
-                                                        initial_constraint_values,
-                                                        new_constraint_values)
-        interior_distance   = calculate_interior_distance(n_cell,
-                                                          initial_values,
-                                                          new_values,
-                                                          initial_constraint_values,
-                                                          new_constraint_values)
+        arguments = (n_cell,
+                     initial_values,
+                     new_values,
+                     initial_constraint_values,
+                     new_constraint_values)
+        margin_distance     = calculate_margin_distance(*arguments)
+        interior_distance   = calculate_interior_distance(*arguments)
         return margin_distance + interior_distance
-    
+
     return calculate_total_distance
 
-# the _accumulate functions, take the discrepancy accumulated on the inner cells so far as a parameter. 
+# the _accumulate functions, take the discrepancy accumulated on the inner cells so far as a parameter.
 # Improves execution time for the _interior_distance and _total_distance functions
 def define_accumulate_interior_distance(func, normalized=True):
     """
@@ -124,22 +121,16 @@ def define_accumulate_total_distance(normalized=True):
                                  new_values,
                                  initial_constraint_values,
                                  new_constraint_values):
-        margin_distance = calculate_margin_distance(n_cell,
-                                                    cell_id,
-                                                    inner_discrepancy,
-                                                    initial_values,
-                                                    new_values,
-                                                    initial_constraint_values,
-                                                    new_constraint_values)
-        inner_distance  = accumulate_interior_distance(n_cell,
-                                                       cell_id,
-                                                       inner_discrepancy,
-                                                       initial_values,
-                                                       new_values,
-                                                       initial_constraint_values,
-                                                       new_constraint_values)
+        arguments = (n_cell,
+                     cell_id,
+                     inner_discrepancy,
+                     initial_values,
+                     new_values,
+                     initial_constraint_values,
+                     new_constraint_values)
+        margin_distance = calculate_margin_distance(*arguments)
+        inner_distance  = accumulate_interior_distance(*arguments)
         total_distance  = margin_distance + inner_distance
         return [total_distance, margin_distance, inner_distance]
 
     return calculate_total_distance
-
