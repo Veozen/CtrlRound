@@ -1,3 +1,8 @@
+"""
+Main module. provide the ctrl_round function to perform controlled rounding of tables.
+Auxiliary functions are also provided.
+"""
+
 from itertools import combinations
 import functools
 from time import perf_counter
@@ -78,6 +83,9 @@ def get_unique_col_name(df, base_name):
     return new_name
 
 def timer(func):
+    """
+    Decorator to print the execution time of a function
+    """
     @functools.wraps(func)
     def wrapper_timer(*args, **kwargs):
         tic = perf_counter()
@@ -290,6 +298,7 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, distance_total=
             "n_fixed_cells"   : n_fixed_cells}
             
   return output
+
 
 
 
