@@ -19,7 +19,7 @@ def agg_by(df:pd.DataFrame, by, var, id):
         })
     else:
         df_agg = df.groupby(by).agg({
-      var: "sum", 
+      var: "sum",
       id: lambda x: x.tolist()
       }).reset_index()
     return df_agg
@@ -47,7 +47,7 @@ def aggregate_and_list(df:pd.DataFrame, by, var=None, margins=None, id=None):
     """
     if by is not None and not isinstance(by,list):
         by = [by]
-        
+    
     subsets=[]
     if by is not None:
         for i in range(0,len(by)):
@@ -55,15 +55,15 @@ def aggregate_and_list(df:pd.DataFrame, by, var=None, margins=None, id=None):
             subsets = subsets + [list(c) for c in comb]
     else:
         subsets=[[]]
-        
+    
     if margins is not None:
         subsets = [sub for sub in subsets if sub in margins]
-        
+    
     df_out = pd.DataFrame()
     for sub in subsets:
         sub_agg = agg_by(df, by=sub, var=var, id=id)
         df_out = pd.concat([df_out,sub_agg],ignore_index=True)
-    return df_out  
+    return df_out
 
 
 def get_unique_col_name(df, base_name):
@@ -74,7 +74,7 @@ def get_unique_col_name(df, base_name):
     new_name = base_name
     while new_name in df.columns:
         new_name = f"{base_name}_{i}"
-        i += 1   
+        i += 1
     return new_name
 
 def timer(func):
@@ -87,7 +87,6 @@ def timer(func):
         print(f"Elapsed time: {elapsed_time:0.4f} seconds")
         return value
     return wrapper_timer
-
 
 @timer
 def ctrl_round(df_in, by, var, margins=None, distance_max=False, distance_total=False, rounding_base=1, fix_rounding_dist= 0, max_heap_size= 100):
@@ -291,6 +290,7 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, distance_total=
             "n_fixed_cells"   : n_fixed_cells}
             
   return output
+
 
 
 
