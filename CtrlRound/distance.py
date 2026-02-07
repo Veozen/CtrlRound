@@ -1,6 +1,9 @@
 #all distance functions must acces input parameters partial_solution, initial_values, constraints, constraint_values
 
 def define_interior_distance(func, normalized=True):
+  """
+  Creates a function to calculate distance from the interior cells
+  """
   def calculate_distance(n_cell, initial_values, new_values, initial_constraint_values, new_constraint_values):
     discrepancies = [0]
     n_cell= max(n_cell,1)
@@ -12,6 +15,9 @@ def define_interior_distance(func, normalized=True):
   return calculate_distance
 
 def define_margin_distance(func, normalized=True):
+  """
+  Creates a function to calculate distance from the margins
+  """
   def calculate_distance(n_cell, initial_values, new_values, initial_constraint_values, new_constraint_values):
     discrepancies = [0]
     n_cell= max(n_cell,1)
@@ -23,6 +29,9 @@ def define_margin_distance(func, normalized=True):
   return calculate_distance 
 
 def define_total_distance(normalized=True): 
+  """
+  Creates a function to calculate distance from the margins and interior cells
+  """
   calculate_margin_distance   = define_margin_distance(sum, normalized=normalized)
   calculate_interior_distance = define_interior_distance(sum, normalized=normalized)
   
@@ -65,3 +74,4 @@ def define_accumulate_total_distance(normalized=True):
     return [total_distance, margin_distance, inner_distance]
   
   return calculate_total_distance
+
