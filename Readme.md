@@ -68,7 +68,7 @@ The generated the table as a pandas dataframe. With columns:
 
 
 ## Example
-'''python
+```python
 from CtrlRound import ctrl_round  
 from CtrlRound import generate_random_table  
 
@@ -81,7 +81,7 @@ print(rounded)
 # Here we control the rounding on some margin but not all. The grand total is included and denoted by the empty list  
 rounded = ctrl_round(test, by=[0,1,2], margins= [[0],[1,2],[] ], var="value")  
 print(rounded) 
-'''
+```
 
 ## License  
 This project is licensed under the MIT License -
@@ -89,6 +89,7 @@ see the [LICENSE](LICENSE) file for details.
 
 ## Changelog   
 For detailed information on changes between versions, see the [CHANGELOG.md](CHANGELOG.md).
+
 
 
 
