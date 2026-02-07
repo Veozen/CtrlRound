@@ -40,19 +40,27 @@ def modify_margins(cell_id, previous_value, new_value, constraints_list, constra
         new_constraint_values[cons] = new_constraint_values[cons]-previous_value + new_value
     return new_constraint_values
 
-def generate_distances(param_list, distance_funcs): 
+def generate_distances(param_list, distance_funcs):
     """
     applies objective functions on the parameter list and unpack the results
     """
-    for f in distance_funcs: 
-        result = f(*param_list) 
-        if isinstance(result, list): 
-            for item in result: 
-                yield item 
-        else: 
-              yield result 
+    for f in distance_funcs:
+        result = f(*param_list)
+        if isinstance(result, list):
+            for item in result:
+                yield item
+        else:
+              yield result
 
-def best_first_search(possible_cell_values, initial_values, constraints, cell_id_constraints, constraint_values, distance_funcs, n_solutions=0, max_heap_size=1000, reset_heap_fraction=0.75):
+def best_first_search(possible_cell_values,
+                      initial_values,
+                      constraints,
+                      cell_id_constraints,
+                      constraint_values,
+                      distance_funcs,
+                      n_solutions = 0,
+                      max_heap_size = 1000,
+                      reset_heap_fraction = 0.75):
     """
     Performs best first search
     input:
@@ -64,7 +72,8 @@ def best_first_search(possible_cell_values, initial_values, constraints, cell_id
       n_solutions           : the number of solutions to output. The first solutions found.
       distance_funcs        : list of functions that will be used to calculation a lsit of distances to associate with a current (partial) solution
       max_heap_size         : the maximum size the heap can be. If reached, half the best solutions will be kept.
-      reset_heap_fraction   : When the heap reaches it's maximum size, it is trimmed to keep only the most promising solution. This parameter determines the size of the heap after being trimmed as a fraction of the maximum size. 
+      reset_heap_fraction   : When the heap reaches it's maximum size, it is trimmed to keep only the most promising solution. 
+                              This parameter determines the size of the heap after being trimmed as a fraction of the maximum size. 
       This parameter has to be between 0 and 1. The higher the value, the more often heap timming occurs. Each trim inceases run-time.
     """
     # a unique counter for each partial solution pushed in the heap
@@ -132,8 +141,10 @@ def best_first_search(possible_cell_values, initial_values, constraints, cell_id
             #new_distances                 = [f(*new_param_list) for f in distance_funcs]
             new_distances                 = list(generate_distances(new_param_list,distance_funcs))
           
-            # a unique counter is stored in the state so that the heap will never attempt at comparing partial soutions distionaries as this would result in an error
-            # if both distances are the same as another element in the heap, at least the counter will be different and used to order the elements
+            # a unique counter is stored in the state so that the heap will never attempt at 
+            # comparing partial soutions distionaries as this would result in an error
+            # if both distances are the same as another element in the heap, 
+            # at least the counter will be different and used to order the elements
             counter                       += 1
             new_state                     = (*new_distances, counter, new_partial_solution, new_constraint_values)
             heapq.heappush(pq,new_state)
@@ -147,8 +158,3 @@ def best_first_search(possible_cell_values, initial_values, constraints, cell_id
           n_heap_purges += 1
           
     return Solutions, counter, n_heap_purges, n_sol_purged
-
-
-
-
-
