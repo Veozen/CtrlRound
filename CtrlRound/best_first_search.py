@@ -74,15 +74,18 @@ def best_first_search(possible_cell_values,
     input:
       possible_cell_values  : dictionary of all decision variables along of all possible values for each
       initial_values        : dictionary of initial values for each decision variable
-      constraints           : dictionary of each contraints to a list of decison variables that aggregate to that constraint's value
+      constraints           : dictionary of each contraints to a list of decison variables that aggregate to 
+                              that constraint's value
       cell_id_constraints   : dictionary of each decision variables to a list of constraint to which it adds up.
       constraint_values     : dictionary of each contraints to the value they shopudl aggregate to
       n_solutions           : the number of solutions to output. The first solutions found.
-      distance_funcs        : list of functions that will be used to calculation a lsit of distances to associate with a current (partial) solution
+      distance_funcs        : list of functions that will be used to calculate a list of distances to 
+                              associate with a current (partial) solution
       max_heap_size         : the maximum size the heap can be. If reached, half the best solutions will be kept.
       reset_heap_fraction   : When the heap reaches it's maximum size, it is trimmed to keep only the most promising solution. 
                               This parameter determines the size of the heap after being trimmed as a fraction of the maximum size. 
-      This parameter has to be between 0 and 1. The higher the value, the more often heap timming occurs. Each trim inceases run-time.
+      This parameter has to be between 0 and 1. The higher the value, the more often heap timming occurs. 
+      Each trim inceases run-time.
     """
     # a unique counter for each partial solution pushed in the heap
     counter           = 0
@@ -117,7 +120,7 @@ def best_first_search(possible_cell_values,
 
     heapq.heappush(pq, initial_state)
 
-    Solutions = []
+    solutions = []
     while pq:
         current_best_node         = heapq.heappop(pq)
         current_partial_solution  = current_best_node[-2]
@@ -134,11 +137,11 @@ def best_first_search(possible_cell_values,
 
         #if the partial solution is complete, store it with objective functions
         if len(current_partial_solution) == len(initial_values):
-            Solutions.append((*current_distances, current_partial_solution, current_constraint_values))
+            solutions.append((*current_distances, current_partial_solution, current_constraint_values))
 
         # output the N first Solutions found
-        if n_solutions > 0 and len(Solutions) == n_solutions:
-            return Solutions, counter, n_heap_purges, n_sol_purged
+        if n_solutions > 0 and len(solutions) == n_solutions:
+            return solutions, counter, n_heap_purges, n_sol_purged
 
         #select a cellID to expland
         cell_id                           = cell_id_list[len(current_partial_solution)]
@@ -181,4 +184,4 @@ def best_first_search(possible_cell_values,
             heapq.heapify(pq)
             n_heap_purges += 1
 
-    return Solutions, counter, n_heap_purges, n_sol_purged
+    return solutions, counter, n_heap_purges, n_sol_purged
