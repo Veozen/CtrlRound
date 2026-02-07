@@ -7,8 +7,10 @@ def generate_random_table(n_dim, n_cat, scale=1):
     sets = [set(range(n_cat)) for _ in range(n_dim)]
     cartesian_product = list(itertools.product(*sets))
     df = pd.DataFrame(cartesian_product, columns=[*range(n_dim)])
+     #generate random values between 0 and scale
     df["value"] = np.random.rand(len(df)) * scale
     return df
   
+
 
 
