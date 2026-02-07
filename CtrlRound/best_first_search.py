@@ -1,7 +1,7 @@
 import heapq
 import sys
 
-def update_progress(progress ):
+def update_progress(progress):
     """
     prints a progress bar. 
     input arg:
@@ -147,6 +147,7 @@ def best_first_search(possible_cell_values, initial_values, constraints, cell_id
           n_heap_purges += 1
           
     return Solutions, counter, n_heap_purges, n_sol_purged
+
 
 
 
