@@ -68,6 +68,9 @@ The generated the table as a pandas dataframe. With columns:
 
 
 ## Example
+from CtrlRound import ctrl_round
+from CtrlRound import generate_random_table
+
 \# Generate a test table with 3 dimensions and 5 categories per dimension.  
 **test = generate_random_table(3, 5, scale=2)**  
 \# Here we use the total distance (sum on the margins and interior cells) and we force the rounding of values that are 10% or less away from their bounds.  
@@ -84,4 +87,5 @@ see the [LICENSE](LICENSE) file for details.
 
 ## Changelog   
 For detailed information on changes between versions, see the [CHANGELOG.md](CHANGELOG.md).
+
 
