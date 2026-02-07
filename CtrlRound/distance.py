@@ -1,5 +1,5 @@
 """
-Utility module to provide disntance functions for controlled rounding
+Utility module to provide distance functions for controlled rounding
 
 all distance functions must access input parameters partial_solution, initial_values, constraints, constraint_values
 """
@@ -11,7 +11,7 @@ def define_interior_distance(func, normalized=True):
     """
     def calculate_distance(n_cell, initial_values, new_values, initial_constraint_values, new_constraint_values):
         discrepancies = [0]
-        n_cell= max(n_cell,1)
+        n_cell= max(n_cell, 1)
         discrepancies = [abs(initial_values[id] - new_values[id]) for id in new_values]
         result = func(discrepancies)
         if normalized:
@@ -88,5 +88,6 @@ def define_accumulate_total_distance(normalized=True):
         return [total_distance, margin_distance, inner_distance]
 
     return calculate_total_distance
+
 
 
