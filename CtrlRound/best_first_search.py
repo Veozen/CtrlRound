@@ -2,6 +2,11 @@ import heapq
 import sys
 
 def update_progress(progress ):
+    """
+    prints a progress bar. 
+    input arg:
+    progress (float) : between 0 and 1
+    """
     barLength : int = 10 # Modify this to change the length of the progress bar
     status    : str = ""
     if isinstance(progress, int):
@@ -138,4 +143,5 @@ def best_first_search(possible_cell_values, initial_values, constraints, cell_id
           n_heap_purges += 1
           
     return Solutions, counter, n_heap_purges, n_sol_purged
+
 
