@@ -25,6 +25,26 @@ def agg_by(df:pd.DataFrame, by, var, id):
     return df_agg
 
 def aggregate_and_list(df:pd.DataFrame, by, var=None, margins=None, id=None):
+    """
+    Aggregate a DataFrame across all possible subsets of specified columns.
+
+    This function generates combinations of the 'by' columns, performs 
+    aggregations for each subset, and concatenates the results into a 
+    single DataFrame.
+
+    Args:
+        df (pd.DataFrame): The source data to be aggregated.
+        by (str or list): Column name(s) to group by and create combinations from.
+        var (str, optional): The variable/column name to be aggregated. 
+            Defaults to None.
+        margins (list of lists, optional): Specific subsets of 'by' to include. 
+            If provided, only these combinations are processed. Defaults to None.
+        id (str, optional): An identifier for the aggregation operation. 
+            Defaults to None.
+
+    Returns:
+        pd.DataFrame: A concatenated DataFrame containing all subset aggregations.
+    """
     if by is not None and not isinstance(by,list):
         by = [by]
         
@@ -47,15 +67,15 @@ def aggregate_and_list(df:pd.DataFrame, by, var=None, margins=None, id=None):
 
 
 def get_unique_col_name(df, base_name):
-  """
-  Generate a unique column name
-  """
-  i = 1
-  new_name = base_name
-  while new_name in df.columns:
-      new_name = f"{base_name}_{i}"
-      i += 1   
-  return new_name
+    """
+    Generate a unique column name
+    """
+    i = 1
+    new_name = base_name
+    while new_name in df.columns:
+        new_name = f"{base_name}_{i}"
+        i += 1   
+    return new_name
 
 def timer(func):
     @functools.wraps(func)
@@ -271,6 +291,7 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, distance_total=
             "n_fixed_cells"   : n_fixed_cells}
             
   return output
+
 
 
 
