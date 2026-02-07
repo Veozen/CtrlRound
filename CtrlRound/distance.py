@@ -1,7 +1,8 @@
 """
 Utility module to provide distance functions for controlled rounding
 
-all distance functions must access input parameters partial_solution, initial_values, constraints, constraint_values
+all distance functions must access input parameters :
+partial_solution, initial_values, constraints, constraint_values
 """
 
 
@@ -53,8 +54,16 @@ def define_total_distance(normalized=True):
                                  new_values,
                                  initial_constraint_values,
                                  new_constraint_values):
-        margin_distance     = calculate_margin_distance(n_cell, initial_values, new_values, initial_constraint_values, new_constraint_values)
-        interior_distance   = calculate_interior_distance(n_cell, initial_values, new_values, initial_constraint_values, new_constraint_values)
+        margin_distance     = calculate_margin_distance(n_cell,
+                                                        initial_values,
+                                                        new_values,
+                                                        initial_constraint_values,
+                                                        new_constraint_values)
+        interior_distance   = calculate_interior_distance(n_cell,
+                                                          initial_values,
+                                                          new_values,
+                                                          initial_constraint_values,
+                                                          new_constraint_values)
         return margin_distance + interior_distance
     
     return calculate_total_distance
@@ -115,9 +124,22 @@ def define_accumulate_total_distance(normalized=True):
                                  new_values,
                                  initial_constraint_values,
                                  new_constraint_values):
-        margin_distance = calculate_margin_distance(n_cell, cell_id, inner_discrepancy, initial_values, new_values, initial_constraint_values, new_constraint_values)
-        inner_distance  = accumulate_interior_distance(n_cell, cell_id, inner_discrepancy, initial_values, new_values, initial_constraint_values, new_constraint_values)
+        margin_distance = calculate_margin_distance(n_cell,
+                                                    cell_id,
+                                                    inner_discrepancy,
+                                                    initial_values,
+                                                    new_values,
+                                                    initial_constraint_values,
+                                                    new_constraint_values)
+        inner_distance  = accumulate_interior_distance(n_cell,
+                                                       cell_id,
+                                                       inner_discrepancy,
+                                                       initial_values,
+                                                       new_values,
+                                                       initial_constraint_values,
+                                                       new_constraint_values)
         total_distance  = margin_distance + inner_distance
         return [total_distance, margin_distance, inner_distance]
 
     return calculate_total_distance
+
