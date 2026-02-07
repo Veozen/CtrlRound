@@ -30,7 +30,6 @@ def update_progress(progress):
     sys.stdout.write(text)
     sys.stdout.flush()
 
-
 def modify_margins(cell_id,
                    previous_value,
                    new_value,
@@ -87,7 +86,7 @@ def best_first_search(possible_cell_values,
     
     # number of distance functions passed
     nfuncs          = len(distance_funcs)
-                          
+    
     # the size of the heap after trimming
     reset_heap_size = int(reset_heap_fraction * max_heap_size)
     
@@ -126,11 +125,11 @@ def best_first_search(possible_cell_values,
         #if the partial solution is complete, store it with objective functions
         if len(current_partial_solution) == len(initial_values):
             Solutions.append((*current_distances, current_partial_solution, current_constraint_values))
-          
+        
         # output the N first Solutions found
         if n_solutions > 0 and len(Solutions) == n_solutions:
             return Solutions, counter, n_heap_purges, n_sol_purged
-          
+        
         #select a cellID to expland
         cell_id                           = cell_id_list[len(current_partial_solution)]
         current_partial_solution[cell_id] = initial_values[cell_id]
@@ -145,7 +144,7 @@ def best_first_search(possible_cell_values,
             new_param_list                = [len(new_partial_solution), cell_id, current_inner_dicrepancy, initial_values, new_partial_solution, constraint_values, new_constraint_values]
             #new_distances                 = [f(*new_param_list) for f in distance_funcs]
             new_distances                 = list(generate_distances(new_param_list,distance_funcs))
-          
+            
             # a unique counter is stored in the state so that the heap will never attempt at 
             # comparing partial soutions distionaries as this would result in an error
             # if both distances are the same as another element in the heap, 
@@ -163,4 +162,3 @@ def best_first_search(possible_cell_values,
             n_heap_purges += 1
     
     return Solutions, counter, n_heap_purges, n_sol_purged
-
