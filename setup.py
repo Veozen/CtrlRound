@@ -1,3 +1,10 @@
+"""
+Setup configuration for the CtrlRound package.
+
+This script handles the packaging, dependency management, and metadata
+required to distribute CtrlRound via PyPI.
+"""
+
 from setuptools import setup, find_packages
 
 setup(
