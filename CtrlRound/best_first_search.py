@@ -32,21 +32,25 @@ def update_progress(progress ):
 
 
 def modify_margins(cell_id, previous_value, new_value, constraints_list, constraint_values ):
-  #modifies the margins corresponding to the new value assigned to the current cell_id
-  new_constraint_values  = constraint_values.copy()
-  for cons in constraints_list:
-    new_constraint_values[cons] = new_constraint_values[cons]-previous_value + new_value
-  return new_constraint_values
+    """
+    modifies the margins corresponding to the new value assigned to the current cell_id
+    """
+    new_constraint_values  = constraint_values.copy()
+    for cons in constraints_list:
+        new_constraint_values[cons] = new_constraint_values[cons]-previous_value + new_value
+    return new_constraint_values
 
 def generate_distances(param_list, distance_funcs): 
-  #applies objective functions on the parameter list and unpack the results
-  for f in distance_funcs: 
-    result = f(*param_list) 
-    if isinstance(result, list): 
-      for item in result: 
-        yield item 
-    else: 
-      yield result 
+    """
+    applies objective functions on the parameter list and unpack the results
+    """
+    for f in distance_funcs: 
+        result = f(*param_list) 
+        if isinstance(result, list): 
+            for item in result: 
+                yield item 
+        else: 
+              yield result 
 
 def best_first_search(possible_cell_values, initial_values, constraints, cell_id_constraints, constraint_values, distance_funcs, n_solutions=0, max_heap_size=1000, reset_heap_fraction=0.75):
     """
@@ -143,5 +147,6 @@ def best_first_search(possible_cell_values, initial_values, constraints, cell_id
           n_heap_purges += 1
           
     return Solutions, counter, n_heap_purges, n_sol_purged
+
 
 
