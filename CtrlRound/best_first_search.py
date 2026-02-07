@@ -24,12 +24,12 @@ def update_progress(progress):
     if progress >= 1:
         progress = 1
         status = "Done...\r\n"
-    block : int = int(round(barLength*progress))
-    bar = "#" * block + "-" * (barLength - block)
+    block : int = int(round(bar_length*progress))
+    progress_bar = "#" * block + "-" * (bar_length - block)
     percent = round(progress * 100, 2)
     text = (
         f"\r{'Progress'.ljust(10)} : "
-        f"[{bar}] {percent}% {status}"
+        f"[{progress_bar}] {percent}% {status}"
     )
     sys.stdout.write(text)
     sys.stdout.flush()
@@ -47,7 +47,8 @@ def modify_margins(cell_id,
         new_constraint_values[cons] = new_constraint_values[cons]-previous_value + new_value
     return new_constraint_values
 
-def generate_distances(param_list, distance_funcs):
+def generate_distances(param_list,
+                       distance_funcs):
     """
     applies objective functions on the parameter list and unpack the results
     """
@@ -99,7 +100,6 @@ def best_first_search(possible_cell_values,
     
     # Priority queue for Best First Search
     pq              = []
-    
     
     #the first solution  is the one where no decision has been made yet
     initial_partial_solution  = {}
@@ -165,7 +165,7 @@ def best_first_search(possible_cell_values,
             #new_distances                 = [f(*new_param_list) for f in distance_funcs]
             new_distances                 = list(generate_distances(new_param_list,distance_funcs))
             
-            # a unique counter is stored in the state so that the heap will never attempt at 
+            # a unique counter is stored in the state so that the heap will never attempt at
             # comparing partial soutions distionaries as this would result in an error
             # if both distances are the same as another element in the heap, 
             # at least the counter will be different and used to order the elements
@@ -182,4 +182,3 @@ def best_first_search(possible_cell_values,
             n_heap_purges += 1
     
     return Solutions, counter, n_heap_purges, n_sol_purged
-
