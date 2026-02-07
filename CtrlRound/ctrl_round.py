@@ -7,7 +7,9 @@ from .distance import define_margin_distance, define_interior_distance, define_t
 from .distance import define_accumulate_margin_distance, define_accumulate_interior_distance, define_accumulate_total_distance
 
 def agg_by(df:pd.DataFrame, by, var, id):
-    #aggregate a grouped dataframe
+    """
+    aggregate a grouped dataframe
+    """
     if by is None or not by:
         sum_value = df[var].sum()
         contributing_rows = list(df[id])
@@ -45,7 +47,9 @@ def aggregate_and_list(df:pd.DataFrame, by, var=None, margins=None, id=None):
 
 
 def get_unique_col_name(df, base_name):
-  # Generate a unique column name
+  """
+  Generate a unique column name
+  """
   i = 1
   new_name = base_name
   while new_name in df.columns:
@@ -267,4 +271,5 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, distance_total=
             "n_fixed_cells"   : n_fixed_cells}
             
   return output
+
 
