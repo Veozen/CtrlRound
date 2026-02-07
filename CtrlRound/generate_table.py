@@ -1,3 +1,7 @@
+"""
+Utiliy module to provide a function to generate a table of random values.
+"""
+
 import itertools
 import pandas as pd
 import numpy as np
@@ -14,6 +18,7 @@ def generate_random_table(n_dim, n_cat, scale=1):
     df["value"] = np.random.rand(len(df)) * scale
     return df
   
+
 
 
 
