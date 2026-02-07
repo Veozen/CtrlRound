@@ -22,7 +22,7 @@ jobs:
         pip install pylint
         pip install -r requirements.txt
         pip install setuptools 
-        pip install -e .  # Installs CtrlRound in "editable" mode so tests can find it
+        pip install .  # Installs CtrlRound in "editable" mode so tests can find it
     - name: Analysing the code with pylint
       run: |
         pylint $(git ls-files '*.py') --fail-under=8.0
