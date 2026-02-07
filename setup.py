@@ -5,8 +5,8 @@ setup(
     version='0.6.0',
     packages=find_packages(),
     install_requires=[
-        numpy>=1.23.5
-        pandas>=2.1.2
+        'numpy>=1.23.5',
+        'pandas>=2.1.2',
     ],
     author='Christian Gagné',
     author_email='christian.gagne@gmail.com',
