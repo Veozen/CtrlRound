@@ -31,7 +31,11 @@ def update_progress(progress):
     sys.stdout.flush()
 
 
-def modify_margins(cell_id, previous_value, new_value, constraints_list, constraint_values ):
+def modify_margins(cell_id,
+                   previous_value,
+                   new_value,
+                   constraints_list,
+                   constraint_values):
     """
     modifies the margins corresponding to the new value assigned to the current cell_id
     """
@@ -50,7 +54,7 @@ def generate_distances(param_list, distance_funcs):
             for item in result:
                 yield item
         else:
-              yield result
+            yield result
 
 def best_first_search(possible_cell_values,
                       initial_values,
@@ -83,6 +87,7 @@ def best_first_search(possible_cell_values,
     
     # number of distance functions passed
     nfuncs          = len(distance_funcs)
+                          
     # the size of the heap after trimming
     reset_heap_size = int(reset_heap_fraction * max_heap_size)
     
@@ -120,11 +125,11 @@ def best_first_search(possible_cell_values,
         
         #if the partial solution is complete, store it with objective functions
         if len(current_partial_solution) == len(initial_values):
-          Solutions.append((*current_distances, current_partial_solution, current_constraint_values))
+            Solutions.append((*current_distances, current_partial_solution, current_constraint_values))
           
         # output the N first Solutions found
         if n_solutions > 0 and len(Solutions) == n_solutions:
-          return Solutions, counter, n_heap_purges, n_sol_purged
+            return Solutions, counter, n_heap_purges, n_sol_purged
           
         #select a cellID to expland
         cell_id                           = cell_id_list[len(current_partial_solution)]
@@ -151,10 +156,11 @@ def best_first_search(possible_cell_values,
         
         #if heap gets too large, cut it in half keeping only the best partial solutions
         if len(pq) >= max_heap_size:
-          pq.sort(key=lambda x: x[:nfuncs])
-          n_sol_purged += len(pq) - reset_heap_size
-          pq            = pq[:reset_heap_size]
-          heapq.heapify(pq)
-          n_heap_purges += 1
-          
+            pq.sort(key=lambda x: x[:nfuncs])
+            n_sol_purged += len(pq) - reset_heap_size
+            pq            = pq[:reset_heap_size]
+            heapq.heapify(pq)
+            n_heap_purges += 1
+    
     return Solutions, counter, n_heap_purges, n_sol_purged
+
