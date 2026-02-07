@@ -1,3 +1,7 @@
+"""
+Module that provides a best first search implementation for controlled rounding
+"""
+
 import heapq
 import sys
 
@@ -178,3 +182,4 @@ def best_first_search(possible_cell_values,
             n_heap_purges += 1
     
     return Solutions, counter, n_heap_purges, n_sol_purged
+
