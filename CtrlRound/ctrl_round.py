@@ -1,7 +1,7 @@
-import pandas as pd
 from itertools import combinations
 import functools
 from time import perf_counter
+import pandas as pd
 from .best_first_search import best_first_search
 from .distance import define_margin_distance, define_interior_distance, define_total_distance
 from .distance import define_accumulate_margin_distance, define_accumulate_interior_distance, define_accumulate_total_distance
@@ -271,5 +271,6 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, distance_total=
             "n_fixed_cells"   : n_fixed_cells}
             
   return output
+
 
 
