@@ -3,3 +3,6 @@ max-line-length=120
 
 [BASIC]
 module-rgx=[a-z_][a-z0-9_]*|CtrlRound
+
+[DESIGN]
+max-positional-arguments=10
