@@ -91,16 +91,16 @@ def best_first_search(possible_cell_values,
     
     # number of distance functions passed
     nfuncs          = len(distance_funcs)
-    
+
     # the size of the heap after trimming
     reset_heap_size = int(reset_heap_fraction * max_heap_size)
-    
+
     # list of all decision variables
     cell_id_list    = list(initial_values.keys())
-    
+
     # Priority queue for Best First Search
     pq              = []
-    
+             
     #the first solution  is the one where no decision has been made yet
     initial_partial_solution  = {}
     initial_inner_dicrepancy  = 0
@@ -114,47 +114,47 @@ def best_first_search(possible_cell_values,
     initial_distances         = list(generate_distances(param_list,distance_funcs))
     initial_state             = (*initial_distances, counter, initial_partial_solution, constraint_values)
     longest_partial_solution  = 0
-    
+
     heapq.heappush(pq, initial_state)
-    
+
     Solutions = []
     while pq:
         current_best_node         = heapq.heappop(pq)
         current_partial_solution  = current_best_node[-2]
         current_constraint_values = current_best_node[-1]
         current_distances         = current_best_node[:-2]
-        
+
         current_inner_dicrepancy  = current_distances[-2]
         current_margin_dicrepancy = current_distances[-3]
-        
+
         longest_partial_solution  = max(longest_partial_solution, len(current_partial_solution))
-        
+
         #update progress bar
         update_progress(longest_partial_solution/ len(initial_values)  )
-        
+
         #if the partial solution is complete, store it with objective functions
         if len(current_partial_solution) == len(initial_values):
             Solutions.append((*current_distances, current_partial_solution, current_constraint_values))
-        
+
         # output the N first Solutions found
         if n_solutions > 0 and len(Solutions) == n_solutions:
             return Solutions, counter, n_heap_purges, n_sol_purged
-        
+
         #select a cellID to expland
         cell_id                           = cell_id_list[len(current_partial_solution)]
         current_partial_solution[cell_id] = initial_values[cell_id]
-        
+
         # Generate neighbors
         for value in possible_cell_values[cell_id]:
             new_partial_solution          = current_partial_solution.copy()
-            
+
             new_constraint_values         = modify_margins(cell_id,
                                                            current_partial_solution[cell_id],
                                                            value,
                                                            cell_id_constraints[cell_id],
                                                            current_constraint_values)
             new_partial_solution[cell_id] = value
-            
+
             new_param_list                = [len(new_partial_solution),
                                              cell_id,
                                              current_inner_dicrepancy,
@@ -164,7 +164,7 @@ def best_first_search(possible_cell_values,
                                              new_constraint_values]
             #new_distances                 = [f(*new_param_list) for f in distance_funcs]
             new_distances                 = list(generate_distances(new_param_list,distance_funcs))
-            
+
             # a unique counter is stored in the state so that the heap will never attempt at
             # comparing partial soutions distionaries as this would result in an error
             # if both distances are the same as another element in the heap, 
@@ -172,7 +172,7 @@ def best_first_search(possible_cell_values,
             counter                       += 1
             new_state                     = (*new_distances, counter, new_partial_solution, new_constraint_values)
             heapq.heappush(pq,new_state)
-        
+
         #if heap gets too large, cut it in half keeping only the best partial solutions
         if len(pq) >= max_heap_size:
             pq.sort(key=lambda x: x[:nfuncs])
@@ -180,6 +180,5 @@ def best_first_search(possible_cell_values,
             pq            = pq[:reset_heap_size]
             heapq.heapify(pq)
             n_heap_purges += 1
-    
-    return Solutions, counter, n_heap_purges, n_sol_purged
 
+    return Solutions, counter, n_heap_purges, n_sol_purged
