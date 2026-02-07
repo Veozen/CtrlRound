@@ -17,9 +17,3 @@ def generate_random_table(n_dim, n_cat, scale=1):
      #generate random values between 0 and scale
     df["value"] = np.random.rand(len(df)) * scale
     return df
-  
-
-
-
-
-
