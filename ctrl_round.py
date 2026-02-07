@@ -145,7 +145,7 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, distance_total=
   n_fixed_cells = 0
   
   # aggregate "var" by "by" columns in case there are duplicates in the input to make sure we have a table with signle entries per cell
-  by_values               = df_in.groupby(by).sum(var).reset_index()
+  by_values               = df_in.groupby(by)[var].sum().reset_index()
   
   # get a unique name not already present in the dataframe to store cell identifier
   cell_id_name            = get_unique_col_name(by_values,"cellId")
@@ -267,3 +267,4 @@ def ctrl_round(df_in, by, var, margins=None, distance_max=False, distance_total=
             "n_fixed_cells"   : n_fixed_cells}
             
   return output
+
