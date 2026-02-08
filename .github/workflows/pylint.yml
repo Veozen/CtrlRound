@@ -21,7 +21,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install pylint
         pip install -r requirements.txt
-        pip install setuptools 
+        pip install setuptools pytest
         pip install .  # Installs CtrlRound in "editable" mode so tests can find it
     - name: Analysing the code with pylint
       run: |
