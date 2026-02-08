@@ -111,13 +111,18 @@ def ctrl_round(df_in,
     input:
       df_in             : pandas dataframe
       by                : list of column names on which to aggregate the input dataframe
-      margins           : list of list of column name indicating which grouping to aggregate. Can be empty in which case all grouping and subgrouping are aggregated.
-      Controlling the rounding on a subset of margins will improve the run-time but will leave the other margins free to potentialy deviate far from their original values.
+      margins           : list of list of column name indicating which grouping to aggregate. 
+                          Can be empty in which case all grouping and subgrouping are aggregated.
+      Controlling the rounding on a subset of margins will improve the run-time but 
+      will leave the other margins free to potentialy deviate far from their original values.
       var               : column to be aggregated
       rounding_base     : the rounding base. Has to be greater than 0.
-      distance_max      : whether or not to include the maximum distance in the list of distances used to sort partial solutions. Not including it results in fewer partial solutions expanded and reduces the run-time.
-      distance_total    : whether or not to add the distance on the margin with the distance on the interior cells as a sorting criterion. If True sorting will be done according to this sum instead of the margin sum then interior sum.
-      fix_rounding_dist : if an entry is close to a rounded value by p% of the rounding base, round that entry to it's closest rounded value and remove the other rounded value from consideration for that entry.
+      distance_max      : whether or not to include the maximum distance in the list of distances used to sort partial solutions. 
+                          Not including it results in fewer partial solutions expanded and reduces the run-time.
+      distance_total    : whether or not to add the distance on the margin with the distance on the interior cells as a sorting criterion. 
+                          If True sorting will be done according to this sum instead of the margin sum then interior sum.
+      fix_rounding_dist : if an entry is close to a rounded value by p% of the rounding base, 
+                          round that entry to it's closest rounded value and remove the other rounded value from consideration for that entry.
       This reduces the search space and run-time at the cost of the quality of the solution.
       max_heap_size     : the maximum size the heap. Has to be greater than 2. Default is 1000.
       A smaller heap will lead to faster run-time at the cost of the quality of the solution.
@@ -242,7 +247,9 @@ def ctrl_round(df_in,
         constraints[row[cons_id_name]] = row[cell_id_name]
 
     # create a mapping of each cell to a list of margins this cell will be aggreagated to
-    cell_id_constraints = {cell_id:[cons_id for cons_id in constraints if cell_id in constraints[cons_id]] for cell_id in cell_id_lst}
+    cell_id_constraints = {cell_id:[cons_id for cons_id in constraints 
+                                    if cell_id in constraints[cons_id]] 
+                           for cell_id in cell_id_lst}
 
     # define distances measures
     accumulate_margin_max_distance    = define_accumulate_margin_distance(max, normalized=False)
@@ -285,10 +292,11 @@ def ctrl_round(df_in,
     calculate_interior_max_distance  = define_interior_distance(max, normalized=False)
     calculate_interior_sum_distance  = define_interior_distance(sum)
 
-    margin_max_distance       = calculate_margin_max_distance(len(solution), initial_values, solution, constraint_values, final_constraint_values)
-    margin_average_distance   = calculate_margin_sum_distance(len(solution), initial_values, solution, constraint_values, final_constraint_values) /len(constraints)
-    interior_max_distance     = calculate_interior_max_distance(len(solution), initial_values, solution, constraint_values, final_constraint_values)
-    interior_average_distance = calculate_interior_sum_distance(len(solution), initial_values, solution, constraint_values, final_constraint_values)
+    distance_arguments        = (len(solution), initial_values, solution, constraint_values, final_constraint_values)
+    margin_max_distance       = calculate_margin_max_distance(*distance_arguments)
+    margin_average_distance   = calculate_margin_sum_distance(*distance_arguments) /len(constraints)
+    interior_max_distance     = calculate_interior_max_distance(*distance_arguments)
+    interior_average_distance = calculate_interior_sum_distance(*distance_arguments)
     distances                 = (margin_max_distance, margin_average_distance, interior_max_distance, interior_average_distance)
 
     #clean up the output
@@ -314,5 +322,6 @@ def ctrl_round(df_in,
               "n_fixed_cells"   : n_fixed_cells}
 
     return output
+
 
 
