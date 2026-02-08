@@ -23,9 +23,16 @@ jobs:
         pip install -r requirements.txt
         pip install setuptools pytest
         pip install .  # Installs CtrlRound in "editable" mode so tests can find it
+    # - name: Analysing the code with pylint
+    #   run: |
+    #     pylint $(git ls-files '*.py') --fail-under=8.0
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py') --fail-under=8.0
+        # Add the current directory to the path so Pylint can "see" the package
+        export PYTHONPATH=$PYTHONPATH:$(pwd)
+        
+        # Tell Pylint to analyze the whole package at once
+        pylint CtrlRound tests/ --fail-under=8.0
       # Add the current directory to the PYTHONPATH
       # run: |
       #   export PYTHONPATH=$PYTHONPATH:$(pwd)
